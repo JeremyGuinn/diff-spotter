@@ -29,8 +29,6 @@
         "title": "Diffspotter",
         "width": 1600,
         "height": 900,
-        "transparent": true,
-        "decorations": false,
         "dragDropEnabled": false
       }
     ]

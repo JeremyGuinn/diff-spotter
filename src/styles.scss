@@ -4,32 +4,7 @@
 @tailwind utilities;
 
 html,
-body {
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  background-color: transparent !important;
-  margin: 0;
-}
-
-html,
 body,
 app-root {
   height: 100%;
-  color: theme('colors.gray.800');
-}
-
-app-root {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  background-color: theme('colors.gray.100');
-  border-radius: theme('borderRadius.lg');
-  border: 1px solid theme('colors.gray.200');
-}
-
-.maximized {
-  app-root {
-    border-radius: 0;
-    border: none;
-  }
 }
