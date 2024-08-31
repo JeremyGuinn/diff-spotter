@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "tauri": "tauri",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "pretty": "prettier --write . --ignore-path .gitignore --ignore-path src-tauri/.gitignore --ignore-path .prettierignore"
   },
   "private": true,
   "dependencies": {
