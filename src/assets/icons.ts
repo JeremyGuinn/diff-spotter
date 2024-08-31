@@ -1,0 +1,1 @@
+export const minimizeIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width:var(--ng-icon__size, 1em);height:var(--ng-icon__size, 1em)" fill="currentColor"><line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>`;

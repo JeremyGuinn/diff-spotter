@@ -1,0 +1,16 @@
+:host {
+  height: 100%;
+  display: block;
+}
+
+:host ::ng-deep {
+  .CodeMirror {
+    transition: border 0.2s ease-in-out;
+    border: theme('borderWidth.2') solid transparent;
+    border-radius: theme('borderRadius.lg');
+
+    &:focus-within {
+      border: theme('borderWidth.2') solid theme('colors.primary');
+    }
+  }
+}

@@ -1,0 +1,35 @@
+<!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
+<!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
+<div class="titlebar" data-tauri-drag-region>
+  <div class="titlebar-actions p-2"></div>
+
+  <div class="titlebar-buttons">
+    <div
+      class="titlebar-button"
+      id="titlebar-minimize"
+      (click)="appWindow.minimize()">
+      <ng-icon name="minimizeIcon" size="70%" class="icon"></ng-icon>
+    </div>
+    <div
+      class="titlebar-button"
+      id="titlebar-maximize"
+      (click)="appWindow.toggleMaximize()">
+      <ng-icon
+        name="remixCheckboxBlankLine"
+        size="60%"
+        class="icon"
+        *ngIf="!isMaximized"></ng-icon>
+      <ng-icon
+        name="remixCheckboxMultipleBlankLine"
+        size="60%"
+        class="icon"
+        *ngIf="isMaximized"></ng-icon>
+    </div>
+    <div
+      class="titlebar-button hover:bg-gray-100 dark:hover:bg-gray-800"
+      id="titlebar-close"
+      (click)="appWindow.close()">
+      <ng-icon name="remixCloseLine" size="70%" class="icon"></ng-icon>
+    </div>
+  </div>
+</div>

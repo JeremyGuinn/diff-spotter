@@ -1,0 +1,48 @@
+<div
+  class="mx-auto min-h-full space-y-4 rounded-xl bg-white p-6 shadow-md dark:bg-gray-900">
+  <div class="flex gap-3">
+    <div class="size-full">
+      <label class="label" for="originalText">Original Text</label>
+      <ngx-codemirror
+        id="originalText"
+        [formControl]="diffForm.controls.originalText"
+        [options]="{
+          lineNumbers: true,
+          theme: 'material',
+          mode: 'markdown',
+        }"></ngx-codemirror>
+    </div>
+
+    <div class="size-full">
+      <label class="label" for="modifiedText">Modified Text</label>
+      <ngx-codemirror
+        id="modifiedText"
+        [formControl]="diffForm.controls.modifiedText"
+        [options]="{
+          lineNumbers: true,
+          theme: 'material',
+          mode: 'markdown',
+        }"></ngx-codemirror>
+    </div>
+  </div>
+
+  <button class="btn btn-primary w-full" (click)="generateDiff()">
+    Generate Diff
+  </button>
+
+  <div
+    *ngIf="diffResult"
+    class="mt-4 rounded-md bg-gray-100 p-4 dark:bg-gray-800">
+    <h3 class="text-xl font-semibold">Difference:</h3>
+    <div class="mt-2">
+      <ngx-codemirror
+        [(ngModel)]="diffResult"
+        [options]="{
+          lineNumbers: true,
+          theme: 'material',
+          mode: 'diff',
+          readOnly: true,
+        }"></ngx-codemirror>
+    </div>
+  </div>
+</div>

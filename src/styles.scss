@@ -1,3 +1,47 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'codemirror/lib/codemirror' as *;
+@use './styles/codemirror-themes' as *;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: transparent !important;
+  margin: 0;
+}
+
+html,
+body,
+app-root {
+  height: 100%;
+  color: theme('colors.gray.800');
+
+  @media (prefers-color-scheme: dark) {
+    color: theme('colors.gray.200');
+  }
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  background-color: theme('colors.gray.100');
+  border-radius: theme('borderRadius.lg');
+  border: 1px solid theme('colors.gray.200');
+
+  @media (prefers-color-scheme: dark) {
+    background-color: theme('colors.gray.800');
+    border-color: theme('colors.gray.700');
+  }
+}
+
+.maximized {
+  app-root {
+    border-radius: 0;
+    border: none;
+  }
+}

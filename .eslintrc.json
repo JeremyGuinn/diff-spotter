@@ -34,8 +34,7 @@
       "files": ["*.html"],
       "extends": [
         "plugin:@angular-eslint/template/recommended",
-        "plugin:@angular-eslint/template/accessibility",
-        "plugin:tailwindcss/recommended"
+        "plugin:@angular-eslint/template/accessibility"
       ],
       "rules": {}
     },
@@ -47,7 +46,8 @@
         "plugin:prettier/recommended"
       ],
       "rules": {
-        "prettier/prettier": ["error", { "parser": "angular" }]
+        "prettier/prettier": ["error", { "parser": "angular" }],
+        "tailwindcss/no-custom-classname": "off"
       }
     }
   ]
