@@ -34,8 +34,8 @@ import { EditorState } from '@codemirror/state';
       remixSaveLine,
     }),
   ],
-  templateUrl: './text.component.html',
-  styleUrl: './text.component.scss',
+  templateUrl: './text-diff.component.html',
+  styleUrl: './text-diff.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextDiffComponent {
@@ -47,6 +47,8 @@ export class TextDiffComponent {
     originalText: new FormControl<string>('', { nonNullable: true }),
     modifiedText: new FormControl<string>('', { nonNullable: true }),
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
+    unifiedDiff: new FormControl<boolean>(false, { nonNullable: true }),
+    collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
   showDiff: boolean = false;

@@ -3,7 +3,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { appWindow } from '@tauri-apps/api/window';
 import { TitlebarComponent } from './layout/titlebar/titlebar.component';
-import { TextDiffComponent } from './diffs/text/text.component';
+import { TextDiffComponent } from './components/text-diff/text-diff.component';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +17,8 @@ export class AppComponent {
   private renderer = inject(Renderer2);
 
   greetingMessage = '';
+
+  constructor() {}
 
   @HostListener('window:resize')
   async onResize(): Promise<void> {

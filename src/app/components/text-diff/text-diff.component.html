@@ -1,0 +1,128 @@
+<div class="flex h-full">
+  <div class="drawer drawer-open h-full flex-1 bg-white dark:bg-gray-900">
+    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-side h-full">
+      <label
+        for="my-drawer"
+        aria-label="close sidebar"
+        class="drawer-overlay"></label>
+      <div class="w-80 p-4 text-base-content">
+        <div class="flex items-center justify-between gap-2">
+          <label class="label" for="live-edit">Real-time diff</label>
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            [formControl]="diffForm.controls.liveEdit" />
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <label class="label" for="live-edit">Unified diff</label>
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            [formControl]="diffForm.controls.unifiedDiff" />
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <label class="label" for="live-edit">Collapse lines</label>
+          <input
+            type="checkbox"
+            class="toggle toggle-sm"
+            [formControl]="diffForm.controls.collapseLines" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="size-full space-y-4 bg-white p-6 shadow-md dark:bg-gray-900">
+    <div class="flex justify-between">
+      <div>
+        <h2 class="text-2xl font-semibold">Untitled diff</h2>
+      </div>
+      <div class="flex items-center justify-end gap-2">
+        <button class="btn btn-ghost btn-sm" (click)="clear()">Clear</button>
+        <button class="btn btn-neutral btn-sm">
+          <ng-icon name="remixSaveLine"></ng-icon>
+          Save
+        </button>
+        <button class="btn btn-primary btn-sm">
+          <ng-icon name="remixShareForwardBoxLine"></ng-icon>
+          Share
+        </button>
+      </div>
+    </div>
+
+    <div
+      *ngIf="showDiff || diffForm.controls.liveEdit.value"
+      class="mt-4 rounded-md bg-gray-100 p-4 dark:bg-gray-800">
+      <h3 class="text-xl font-semibold">Difference:</h3>
+      <div class="mt-2">
+        <ng-container *ngIf="!diffForm.controls.liveEdit.value">
+          <ng-container
+            *ngTemplateOutlet="
+              diffEditorTemplate;
+              context: { readonly: true }
+            "></ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="diffForm.controls.liveEdit.value">
+          <ng-container
+            *ngTemplateOutlet="
+              diffEditorTemplate;
+              context: { readonly: false }
+            "></ng-container>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3" *ngIf="!diffForm.controls.liveEdit.value">
+      <div class="min-w-96 flex-1">
+        <div class="flex content-center items-center justify-between">
+          <label class="label" for="originalText">Original Text</label>
+          <button
+            class="btn btn-ghost btn-primary btn-sm"
+            (click)="openFile(diffForm.controls.originalText)">
+            <ng-icon name="remixFileAddLine"></ng-icon>
+            Open file
+          </button>
+        </div>
+        <code-editor
+          [formControl]="diffForm.controls.originalText"
+          [theme]="theme"
+          [style.height.px]="300">
+        </code-editor>
+      </div>
+
+      <div class="min-w-96 flex-1">
+        <div class="flex content-center items-center justify-between">
+          <label class="label" for="modifiedText">Modified Text</label>
+          <button
+            class="btn btn-ghost btn-primary btn-sm"
+            (click)="openFile(diffForm.controls.modifiedText)">
+            <ng-icon name="remixFileAddLine"></ng-icon>
+            Open file
+          </button>
+        </div>
+        <code-editor
+          [formControl]="diffForm.controls.modifiedText"
+          [theme]="theme"
+          [style.height.px]="300">
+        </code-editor>
+      </div>
+    </div>
+
+    <button class="btn btn-primary w-full" (click)="showDiff = true">
+      Find Differences
+    </button>
+  </div>
+
+  <ng-template #diffEditorTemplate let-readonly="readonly">
+    <diff-editor
+      [originalExtensions]="[theme, EditorState.readOnly.of(readonly)]"
+      [modifiedExtensions]="[theme, EditorState.readOnly.of(readonly)]"
+      [style.height.px]="300"
+      [collapseUnchanged]="{ margin: 3, minSize: 4 }"
+      [(originalValue)]="diffForm.controls.originalText.value"
+      [(modifiedValue)]="diffForm.controls.modifiedText.value">
+    </diff-editor>
+  </ng-template>
+</div>

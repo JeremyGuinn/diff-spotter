@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  inject,
 } from '@angular/core';
 import { appWindow } from '@tauri-apps/api/window';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -11,9 +12,14 @@ import {
   remixCheckboxBlankLine,
   remixCheckboxMultipleBlankLine,
   remixCloseLine,
+  remixSettingsLine,
+  remixMoonLine,
+  remixSunLine,
 } from '@ng-icons/remixicon';
 
 import { minimizeIcon } from '../../../assets/icons';
+import { Theme, ThemeService } from '../../services/theme.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-titlebar',
@@ -28,20 +34,40 @@ import { minimizeIcon } from '../../../assets/icons';
       remixCheckboxMultipleBlankLine,
       remixCloseLine,
       minimizeIcon,
+      remixSettingsLine,
+      remixMoonLine,
+      remixSunLine,
     }),
   ],
 })
 export class TitlebarComponent {
-  protected appWindow = appWindow;
+  private readonly themeService = inject(ThemeService);
+
+  protected theme = this.themeService.getTheme();
+  protected maximized = new BehaviorSubject<boolean>(false);
+
+  protected async setTheme(theme: Theme) {
+    this.themeService.setTheme(theme);
+  }
 
   @HostListener('window:resize')
   async onResize(): Promise<void> {
-    this.isMaximized = await this.appWindow.isMaximized();
+    this.maximized.next(await appWindow.isMaximized());
   }
 
   constructor() {
     this.onResize();
   }
 
-  protected isMaximized = false;
+  async closeWindow() {
+    await appWindow.close();
+  }
+
+  async minimizeWindow() {
+    await appWindow.minimize();
+  }
+
+  async toggleMaximizeWindow() {
+    await appWindow.toggleMaximize();
+  }
 }

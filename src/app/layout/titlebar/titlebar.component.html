@@ -1,35 +1,38 @@
 <!-- eslint-disable @angular-eslint/template/interactive-supports-focus -->
 <!-- eslint-disable @angular-eslint/template/click-events-have-key-events -->
-<div class="titlebar" data-tauri-drag-region>
-  <div class="titlebar-actions p-2"></div>
-
-  <div class="titlebar-buttons">
-    <div
-      class="titlebar-button"
+<div class="grid h-[28px] grid-cols-3 justify-between">
+  <div class="flex justify-start" data-tauri-drag-region>
+    <app-file-menu></app-file-menu>
+  </div>
+  <div
+    class="flex select-none items-center justify-center text-sm"
+    data-tauri-drag-region>
+    Diff Spotter
+  </div>
+  <div class="flex justify-end" data-tauri-drag-region>
+    <button
+      class="flex w-[44px] items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700"
       id="titlebar-minimize"
-      (click)="appWindow.minimize()">
-      <ng-icon name="minimizeIcon" size="70%" class="icon"></ng-icon>
-    </div>
-    <div
-      class="titlebar-button"
+      (click)="minimizeWindow()">
+      <ng-icon name="minimizeIcon" size="24px"></ng-icon>
+    </button>
+    <button
+      class="flex w-[44px] items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700"
       id="titlebar-maximize"
-      (click)="appWindow.toggleMaximize()">
+      (click)="toggleMaximizeWindow()">
       <ng-icon
-        name="remixCheckboxBlankLine"
-        size="60%"
-        class="icon"
-        *ngIf="!isMaximized"></ng-icon>
-      <ng-icon
-        name="remixCheckboxMultipleBlankLine"
-        size="60%"
-        class="icon"
-        *ngIf="isMaximized"></ng-icon>
-    </div>
-    <div
-      class="titlebar-button hover:bg-gray-100 dark:hover:bg-gray-800"
+        [name]="
+          (maximized | async)
+            ? 'remixCheckboxMultipleBlankLine'
+            : 'remixCheckboxBlankLine'
+        "
+        size="16px"></ng-icon>
+    </button>
+    <button
+      class="flex w-[44px] items-center justify-center hover:bg-red-500"
       id="titlebar-close"
-      (click)="appWindow.close()">
-      <ng-icon name="remixCloseLine" size="70%" class="icon"></ng-icon>
-    </div>
+      (click)="closeWindow()">
+      <ng-icon name="remixCloseLine" size="24px"></ng-icon>
+    </button>
   </div>
 </div>
