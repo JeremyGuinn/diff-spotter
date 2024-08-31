@@ -40,14 +40,18 @@
       ],
       "extends": [
         "plugin:@angular-eslint/template/recommended",
-        "plugin:@angular-eslint/template/accessibility"
+        "plugin:@angular-eslint/template/accessibility",
+        "plugin:tailwindcss/recommended"
       ],
       "rules": {}
     },
     {
       "files": ["*.html"],
       "excludedFiles": ["*inline-template-*.component.html"],
-      "extends": ["plugin:prettier/recommended"],
+      "extends": [
+        "plugin:tailwindcss/recommended",
+        "plugin:prettier/recommended"
+      ],
       "rules": {
         "prettier/prettier": ["error", { "parser": "angular" }]
       }

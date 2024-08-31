@@ -4,9 +4,7 @@
   "newProjectRoot": "projects",
   "cli": {
     "analytics": false,
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ]
+    "schematicCollections": ["@angular-eslint/schematics"]
   },
   "projects": {
     "diff-spotter": {
@@ -21,13 +19,10 @@
             "outputPath": "dist/diff-spotter",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/assets"
-            ]
+            "assets": ["src/assets"],
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -71,10 +66,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
