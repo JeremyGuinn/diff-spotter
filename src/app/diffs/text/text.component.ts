@@ -6,46 +6,80 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { CodemirrorModule } from '@ctrl/ngx-codemirror';
-import * as diff from 'diff';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import {
+  remixFileAddLine,
+  remixShareForwardBoxLine,
+  remixSaveLine,
+} from '@ng-icons/remixicon';
+import { CodeEditor, DiffEditor } from '@acrodata/code-editor';
+import { material } from '@uiw/codemirror-theme-material';
+import { EditorState } from '@codemirror/state';
 
 @Component({
   selector: 'app-text-diff',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CodemirrorModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgIconComponent,
+    CodeEditor,
+    DiffEditor,
+  ],
+  providers: [
+    provideIcons({
+      remixFileAddLine,
+      remixShareForwardBoxLine,
+      remixSaveLine,
+    }),
+  ],
   templateUrl: './text.component.html',
   styleUrl: './text.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextDiffComponent {
   protected document = inject(DOCUMENT);
+  protected theme = material;
+  protected EditorState = EditorState;
 
   diffForm = new FormGroup({
-    originalText: new FormControl(''),
-    modifiedText: new FormControl(''),
+    originalText: new FormControl<string>('', { nonNullable: true }),
+    modifiedText: new FormControl<string>('', { nonNullable: true }),
+    liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
-  diffResult: string | null = null;
+  showDiff: boolean = false;
 
-  generateDiff(): void {
-    const diff = this.getDiff(
-      this.diffForm.value.originalText || '',
-      this.diffForm.value.modifiedText || ''
-    );
-
-    this.diffResult = diff;
+  renderRevertControl(): HTMLElement {
+    const revertControl = this.document.createElement('div');
+    revertControl.innerHTML = `
+      <button class="revert-control" title="Revert changes">
+        <ng-icon name="remixFileAddLine"></ng-icon>
+      </button>
+    `;
+    return revertControl;
   }
 
-  getDiff(originalText: string, modifiedText: string): string {
-    const diffResult = diff.createTwoFilesPatch(
-      'original',
-      'modified',
-      originalText,
-      modifiedText,
-      '',
-      ''
-    );
+  openFile(control: FormControl): void {
+    const input = this.document.createElement('input');
+    input.type = 'file';
+    input.accept = 'text/*';
+    input.addEventListener('change', event => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          control.setValue(reader.result);
+        };
+        reader.readAsText(file);
+      }
+    });
+    input.click();
+  }
 
-    return diffResult;
+  clear(): void {
+    this.diffForm.reset();
+    this.showDiff = false;
   }
 }

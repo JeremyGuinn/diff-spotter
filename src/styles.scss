@@ -1,7 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-@use 'codemirror/lib/codemirror' as *;
-@use './styles/codemirror-themes' as *;
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

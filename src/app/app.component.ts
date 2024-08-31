@@ -1,7 +1,6 @@
 import { Component, HostListener, inject, Renderer2 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { invoke } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
 import { TitlebarComponent } from './layout/titlebar/titlebar.component';
 import { TextDiffComponent } from './diffs/text/text.component';
@@ -28,16 +27,14 @@ export class AppComponent {
     }
   }
 
-  constructor() {
-    this.onResize();
-  }
-
-  greet(event: SubmitEvent, name: string): void {
-    event.preventDefault();
-
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    invoke<string>('greet', { name }).then(text => {
-      this.greetingMessage = text;
-    });
+  @HostListener('window:dragover', ['$event'])
+  preventFileDrop(e: DragEvent): void {
+    if (e) {
+      e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'none';
+        e.dataTransfer.dropEffect = 'none';
+      }
+    }
   }
 }
