@@ -2,31 +2,27 @@
   "build": {
     "beforeDevCommand": "pnpm start",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist/diff-spotter/browser"
+    "frontendDist": "../dist/diff-spotter/browser",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "diff-spotter",
-    "version": "0.1.0"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "window": {
-        "all": false,
-        "close": true,
-        "hide": true,
-        "show": true,
-        "maximize": true,
-        "minimize": true,
-        "unmaximize": true,
-        "unminimize": true,
-        "startDragging": true
-      }
+  "productName": "diff-spotter",
+  "version": "0.1.0",
+  "identifier": "com.diff-spotter.app",
+  "plugins": {},
+  "app": {
+    "security": {
+      "csp": null
     },
     "windows": [
       {
@@ -35,23 +31,8 @@
         "height": 900,
         "transparent": true,
         "decorations": false,
-        "fileDropEnabled": false
+        "dragDropEnabled": false
       }
-    ],
-    "security": {
-      "csp": null
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.diff-spotter.app",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    }
+    ]
   }
 }

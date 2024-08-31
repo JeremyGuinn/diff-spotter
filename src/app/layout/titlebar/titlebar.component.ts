@@ -5,7 +5,7 @@ import {
   HostListener,
   inject,
 } from '@angular/core';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -20,6 +20,8 @@ import {
 import { minimizeIcon } from '../../../assets/icons';
 import { Theme, ThemeService } from '../../services/theme.service';
 import { BehaviorSubject } from 'rxjs';
+
+const appWindow = getCurrentWebviewWindow();
 
 @Component({
   selector: 'app-titlebar',

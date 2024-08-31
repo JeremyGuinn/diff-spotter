@@ -1,4 +1,4 @@
-import { Store } from 'tauri-plugin-store-api';
+import { Store } from '@tauri-apps/plugin-store';
 import { StorageService } from './storage.service';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { catchError, from, map, Observable, of, tap } from 'rxjs';

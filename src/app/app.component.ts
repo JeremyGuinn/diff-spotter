@@ -1,9 +1,11 @@
 import { Component, HostListener, inject, Renderer2 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { appWindow } from '@tauri-apps/api/window';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { TitlebarComponent } from './layout/titlebar/titlebar.component';
 import { TextDiffComponent } from './components/text-diff/text-diff.component';
+
+const appWindow = getCurrentWebviewWindow();
 
 @Component({
   selector: 'app-root',
@@ -15,8 +17,6 @@ import { TextDiffComponent } from './components/text-diff/text-diff.component';
 export class AppComponent {
   private document = inject(DOCUMENT);
   private renderer = inject(Renderer2);
-
-  greetingMessage = '';
 
   constructor() {}
 
