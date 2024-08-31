@@ -1,5 +1,10 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  inject,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -39,9 +44,10 @@ import { EditorState } from '@codemirror/state';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextDiffComponent {
-  protected document = inject(DOCUMENT);
-  protected theme = material;
-  protected EditorState = EditorState;
+  protected readonly document = inject(DOCUMENT);
+
+  protected readonly EditorState = EditorState;
+  protected readonly theme = material;
 
   diffForm = new FormGroup({
     originalText: new FormControl<string>('', { nonNullable: true }),
@@ -52,6 +58,14 @@ export class TextDiffComponent {
   });
 
   showDiff: boolean = false;
+
+  @HostListener('dragover', ['$event'])
+  allowFileDrop(e: DragEvent): void {
+    if (e.target instanceof HTMLElement && e.target.closest('code-editor')) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
 
   renderRevertControl(): HTMLElement {
     const revertControl = this.document.createElement('div');
