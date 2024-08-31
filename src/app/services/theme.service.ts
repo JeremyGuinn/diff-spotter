@@ -19,17 +19,22 @@ export class ThemeService {
   ) {}
 
   public async initializeTheme(): Promise<void> {
-    const savedTheme = await firstValueFrom(
+    let themePrefs = await firstValueFrom(
       this.preferenceService.getPreferences(this.THEME_PREFERENCE_KEY)
     );
 
-    if (!savedTheme) {
-      this.setTheme('system');
+    if (!themePrefs) {
+      themePrefs = {
+        theme: 'system',
+      };
+
+      this.preferenceService.setPreferences(
+        this.THEME_PREFERENCE_KEY,
+        themePrefs
+      );
     }
 
-    this.getTheme().subscribe(theme => {
-      this.applyTheme(theme);
-    });
+    this.setTheme(themePrefs.theme);
   }
 
   public getTheme(): Observable<Theme> {
