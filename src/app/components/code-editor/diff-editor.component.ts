@@ -2,15 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   SimpleChanges,
   ViewEncapsulation,
 } from '@angular/core';
 
 import { DiffEditor } from '@acrodata/code-editor';
+import { MergeView } from '@codemirror/merge';
 
 @Component({
   selector: 'app-diff-editor',
@@ -48,6 +51,8 @@ export class DiffEditorComponent
 {
   @Input() minHeight?: string;
 
+  @Output() readonly viewReady = new EventEmitter<MergeView>();
+
   constructor(private elementRef: ElementRef) {
     super(elementRef);
   }
@@ -74,5 +79,10 @@ export class DiffEditorComponent
     }
 
     super.ngOnChanges(changes);
+  }
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.viewReady.emit(this.mergeView);
   }
 }

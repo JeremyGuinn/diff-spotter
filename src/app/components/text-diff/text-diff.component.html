@@ -60,11 +60,13 @@
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-1 font-semibold text-red-700">
             <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
-            {{ removals | async | i18nPlural: pluralMapping('removal') }}
+            <span>{{
+              (stats | async)?.removals | i18nPlural: pluralMapping('removal')
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-gray-400">{{
-              getLines(diffForm.controls.originalText.value)
+              (stats | async)?.originalTextLines
                 | i18nPlural: pluralMapping('line')
             }}</span>
             <button class="btn btn-ghost btn-sm">Copy</button>
@@ -78,47 +80,45 @@
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-1 font-semibold text-green-700">
             <ng-icon name="remixAddCircleFill"></ng-icon>
-            {{ additions | async | i18nPlural: pluralMapping('addition') }}
+            <span>{{
+              (stats | async)?.additions | i18nPlural: pluralMapping('addition')
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-gray-400">{{
-              getLines(diffForm.controls.modifiedText.value)
+              (stats | async)?.modifiedTextLines
                 | i18nPlural: pluralMapping('line')
             }}</span>
             <button class="btn btn-ghost btn-sm">Copy</button>
           </div>
         </div>
       </div>
-      @if (diffSettings.controls.unifiedDiff.value) {
-        <app-code-editor
-          minHeight="600px"
-          [value]="liveDiff.controls.modifiedText.value"
-          [disabled]="true"
-          [readonly]="true"
-          [lineWrapping]="true"
-          [extensions]="(unifiedDiffExtensions | async)!"
-          [theme]="(editorTheme | async)!"
-          #unifiedDiffEditor></app-code-editor>
-      } @else {
-        <app-diff-editor
-          minHeight="600px"
-          [originalExtensions]="(diffExtensions | async)!"
-          [modifiedExtensions]="(diffExtensions | async)!"
-          [collapseUnchanged]="
-            diffSettings.controls.collapseLines.value
-              ? { margin: 3, minSize: 4 }
-              : undefined
-          "
-          [originalValue]="liveDiff.controls.originalText.value"
-          [modifiedValue]="liveDiff.controls.modifiedText.value"
-          (modifiedValueChange)="
-            diffForm.controls.modifiedText.setValue($event)
-          "
-          (originalValueChange)="
-            diffForm.controls.originalText.setValue($event)
-          "
-          #diffEditor></app-diff-editor>
-      }
+
+      <app-diff-editor
+        *ngIf="!diffSettings.controls.unifiedDiff.value"
+        minHeight="600px"
+        [originalExtensions]="(diffExtensions | async)!"
+        [modifiedExtensions]="(diffExtensions | async)!"
+        [collapseUnchanged]="
+          diffSettings.controls.collapseLines.value
+            ? { margin: 3, minSize: 4 }
+            : undefined
+        "
+        [originalValue]="liveDiff.controls.originalText.value"
+        [modifiedValue]="liveDiff.controls.modifiedText.value"
+        (modifiedValueChange)="diffForm.controls.modifiedText.setValue($event)"
+        (originalValueChange)="diffForm.controls.originalText.setValue($event)"
+        (viewReady)="diffMergeView.next($event)"></app-diff-editor>
+
+      <app-code-editor
+        *ngIf="diffSettings.controls.unifiedDiff.value"
+        minHeight="600px"
+        [value]="liveDiff.controls.modifiedText.value"
+        [disabled]="true"
+        [readonly]="true"
+        [lineWrapping]="true"
+        [extensions]="(unifiedDiffExtensions | async)!"
+        [theme]="(editorTheme | async)!"></app-code-editor>
     }
 
     @if (!diffSettings.controls.liveEdit.value) {
@@ -137,6 +137,7 @@
             [formControl]="diffForm.controls.originalText"
             [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
+            data-control="originalText"
             minHeight="300px">
           </app-code-editor>
         </div>
@@ -155,6 +156,7 @@
             [formControl]="diffForm.controls.modifiedText"
             [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
+            data-control="modifiedText"
             minHeight="300px">
           </app-code-editor>
         </div>
