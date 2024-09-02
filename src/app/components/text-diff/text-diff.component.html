@@ -1,14 +1,11 @@
 <div class="flex h-full">
-  <div
-    class="drawer drawer-open h-full flex-1"
-    *ngIf="showDiff() || diffSettings.controls.liveEdit.value">
-    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-side h-full">
-      <label
-        for="my-drawer"
-        aria-label="close sidebar"
-        class="drawer-overlay"></label>
-      <div class="w-80 p-4 text-base-content">
+  @if (
+    liveDiff.controls.originalText.value ||
+    liveDiff.controls.modifiedText.value ||
+    diffSettings.controls.liveEdit.value
+  ) {
+    <div>
+      <div class="sticky top-0 w-80 p-4 text-base-content">
         <div class="flex items-center justify-between gap-2">
           <label class="label" for="live-edit">Dark mode</label>
           <input
@@ -47,9 +44,9 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="size-full space-y-4 p-6 shadow-md">
-    <div class="flex justify-between">
+  }
+  <div class="w-full space-y-4 p-6 shadow-md">
+    <div class="sticky top-0 z-10 flex justify-between bg-base-100 py-2">
       <div>
         <h2 class="text-2xl font-semibold">Untitled diff</h2>
       </div>
@@ -66,23 +63,60 @@
       </div>
     </div>
 
-    <div
-      *ngIf="showDiff() || diffSettings.controls.liveEdit.value"
-      class="mt-4 rounded-md">
-      <div class="mt-2">
-        <diff-editor
-          *ngIf="showDiff()"
-          [originalExtensions]="[
-            editorTheme(),
-            EditorState.readOnly.of(!diffSettings.controls.liveEdit.value),
-            EditorView.editable.of(diffSettings.controls.liveEdit.value),
-          ]"
-          [modifiedExtensions]="[
-            editorTheme(),
-            EditorState.readOnly.of(!diffSettings.controls.liveEdit.value),
-            EditorView.editable.of(diffSettings.controls.liveEdit.value),
-          ]"
-          [style.height.px]="diffSettings.controls.liveEdit.value ? 700 : 300"
+    @if (
+      liveDiff.controls.originalText.value ||
+      liveDiff.controls.modifiedText.value ||
+      diffSettings.controls.liveEdit.value
+    ) {
+      <div
+        class="border-b-grap-200 flex justify-between gap-3 border-b-2 p-2 dark:border-b-gray-600">
+        <div class="flex flex-1 items-center justify-between">
+          <div class="flex items-center gap-1 font-semibold text-red-700">
+            <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
+            {{ removals | async | i18nPlural: pluralMapping('removal') }}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">{{
+              getLines(diffForm.controls.originalText.value)
+                | i18nPlural: pluralMapping('line')
+            }}</span>
+            <button class="btn btn-ghost btn-sm">Copy</button>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-square btn-ghost btn-sm" (click)="swapTexts()">
+            <ng-icon name="remixArrowLeftRightFill"></ng-icon>
+          </button>
+        </div>
+        <div class="flex flex-1 items-center justify-between">
+          <div class="flex items-center gap-1 font-semibold text-green-700">
+            <ng-icon name="remixAddCircleFill"></ng-icon>
+            {{ additions | async | i18nPlural: pluralMapping('addition') }}
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-400">{{
+              getLines(diffForm.controls.modifiedText.value)
+                | i18nPlural: pluralMapping('line')
+            }}</span>
+            <button class="btn btn-ghost btn-sm">Copy</button>
+          </div>
+        </div>
+      </div>
+      @if (diffSettings.controls.unifiedDiff.value) {
+        <app-code-editor
+          minHeight="600px"
+          [value]="liveDiff.controls.modifiedText.value"
+          [disabled]="true"
+          [readonly]="true"
+          [lineWrapping]="true"
+          [extensions]="(unifiedDiffExtensions | async)!"
+          [theme]="theme() === 'dark' ? 'dark' : 'light'"
+          #unifiedDiffEditor></app-code-editor>
+      } @else {
+        <app-diff-editor
+          minHeight="600px"
+          [originalExtensions]="(diffExtensions | async)!"
+          [modifiedExtensions]="(diffExtensions | async)!"
           [collapseUnchanged]="
             diffSettings.controls.collapseLines.value
               ? { margin: 3, minSize: 4 }
@@ -95,55 +129,53 @@
           "
           (originalValueChange)="
             diffForm.controls.originalText.setValue($event)
-          "></diff-editor>
-      </div>
-    </div>
+          "
+          #diffEditor></app-diff-editor>
+      }
+    }
 
-    <div
-      class="flex flex-wrap gap-3"
-      *ngIf="!diffSettings.controls.liveEdit.value">
-      <div class="min-w-96 flex-1">
-        <div class="flex content-center items-center justify-between">
-          <label class="label" for="originalText">Original Text</label>
-          <button
-            class="btn btn-ghost btn-primary btn-sm"
-            (click)="openFile(diffForm.controls.originalText)">
-            <ng-icon name="remixFileAddLine"></ng-icon>
-            Open file
-          </button>
+    @if (!diffSettings.controls.liveEdit.value) {
+      <div class="flex flex-wrap gap-3">
+        <div class="min-w-96 flex-1">
+          <div class="flex content-center items-center justify-between">
+            <label class="label" for="originalText">Original Text</label>
+            <button
+              class="btn btn-ghost btn-primary btn-sm"
+              (click)="openFile(diffForm.controls.originalText)">
+              <ng-icon name="remixFileAddLine"></ng-icon>
+              Open file
+            </button>
+          </div>
+          <app-code-editor
+            [formControl]="diffForm.controls.originalText"
+            [theme]="theme() === 'dark' ? 'dark' : 'light'"
+            [lineWrapping]="true"
+            minHeight="300px">
+          </app-code-editor>
         </div>
-        <code-editor
-          [formControl]="diffForm.controls.originalText"
-          [theme]="editorTheme()"
-          [style.height.px]="300"
-          data-control="originalText">
-        </code-editor>
-      </div>
 
-      <div class="min-w-96 flex-1">
-        <div class="flex content-center items-center justify-between">
-          <label class="label" for="modifiedText">Modified Text</label>
-          <button
-            class="btn btn-ghost btn-primary btn-sm"
-            (click)="openFile(diffForm.controls.modifiedText)">
-            <ng-icon name="remixFileAddLine"></ng-icon>
-            Open file
-          </button>
+        <div class="min-w-96 flex-1">
+          <div class="flex content-center items-center justify-between">
+            <label class="label" for="modifiedText">Modified Text</label>
+            <button
+              class="btn btn-ghost btn-primary btn-sm"
+              (click)="openFile(diffForm.controls.modifiedText)">
+              <ng-icon name="remixFileAddLine"></ng-icon>
+              Open file
+            </button>
+          </div>
+          <app-code-editor
+            [formControl]="diffForm.controls.modifiedText"
+            [theme]="theme() === 'dark' ? 'dark' : 'light'"
+            [lineWrapping]="true"
+            minHeight="300px">
+          </app-code-editor>
         </div>
-        <code-editor
-          [formControl]="diffForm.controls.modifiedText"
-          [theme]="editorTheme()"
-          [style.height.px]="300"
-          data-control="modifiedText">
-        </code-editor>
       </div>
-    </div>
 
-    <button
-      class="btn btn-primary w-full"
-      (click)="findDiff()"
-      *ngIf="!diffSettings.controls.liveEdit.value">
-      Find Differences
-    </button>
+      <button class="btn btn-primary w-full" (click)="findDiff()">
+        Find Differences
+      </button>
+    }
   </div>
 </div>

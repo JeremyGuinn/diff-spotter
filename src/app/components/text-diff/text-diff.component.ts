@@ -1,11 +1,12 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   HostListener,
   inject,
-  signal,
+  ViewChild,
 } from '@angular/core';
 import {
   FormControl,
@@ -18,14 +19,19 @@ import {
   remixFileAddLine,
   remixShareForwardBoxLine,
   remixSaveLine,
+  remixAddCircleFill,
+  remixIndeterminateCircleFill,
+  remixArrowLeftRightFill,
 } from '@ng-icons/remixicon';
-import { CodeEditor, DiffEditor } from '@acrodata/code-editor';
 import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { ThemeService } from '../../services/theme.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { merge } from 'rxjs';
+import { combineLatest, map, shareReplay, startWith } from 'rxjs';
+import { CodeEditorComponent } from '../code-editor/code-editor.component';
+import { DiffEditorComponent } from '../code-editor/diff-editor.component';
+import { unifiedMergeView } from '@codemirror/merge';
 
 @Component({
   selector: 'app-text-diff',
@@ -35,14 +41,17 @@ import { merge } from 'rxjs';
     FormsModule,
     ReactiveFormsModule,
     NgIconComponent,
-    CodeEditor,
-    DiffEditor,
+    CodeEditorComponent,
+    DiffEditorComponent,
   ],
   providers: [
     provideIcons({
       remixFileAddLine,
       remixShareForwardBoxLine,
       remixSaveLine,
+      remixAddCircleFill,
+      remixIndeterminateCircleFill,
+      remixArrowLeftRightFill,
     }),
   ],
   templateUrl: './text-diff.component.html',
@@ -52,7 +61,9 @@ import { merge } from 'rxjs';
 export class TextDiffComponent {
   protected readonly EditorState = EditorState;
   protected readonly EditorView = EditorView;
+  protected readonly unifiedMergeView = unifiedMergeView;
 
+  protected readonly changeDetector = inject(ChangeDetectorRef);
   protected readonly document = inject(DOCUMENT);
   protected readonly themeService = inject(ThemeService);
 
@@ -60,6 +71,12 @@ export class TextDiffComponent {
   protected readonly editorTheme = computed(() =>
     this.theme() === 'dark' ? materialDark : materialLight
   );
+
+  @ViewChild('diffEditor', { read: DiffEditorComponent })
+  protected readonly diffEditor?: DiffEditorComponent;
+
+  @ViewChild('unifiedDiffEditor', { read: CodeEditorComponent })
+  protected readonly unifiedDiffEditor?: CodeEditorComponent;
 
   diffSettings = new FormGroup({
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
@@ -77,7 +94,40 @@ export class TextDiffComponent {
     modifiedText: new FormControl<string>('', { nonNullable: true }),
   });
 
-  showDiff = signal(false);
+  diffExtensions = combineLatest({
+    editable: this.diffSettings.controls.liveEdit.valueChanges.pipe(
+      startWith(this.diffSettings.controls.liveEdit.value)
+    ),
+    theme: this.themeService.getTheme(),
+  }).pipe(
+    map(({ editable, theme }) => [
+      EditorView.editable.of(editable),
+      EditorState.readOnly.of(!editable),
+      EditorView.lineWrapping,
+      theme === 'dark' ? materialDark : materialLight,
+    ]),
+    shareReplay(1)
+  );
+
+  unifiedDiffExtensions = combineLatest({
+    collapseLines: this.diffSettings.controls.collapseLines.valueChanges.pipe(
+      startWith(this.diffSettings.controls.collapseLines.value)
+    ),
+    originalValue: this.liveDiff.controls.originalText.valueChanges.pipe(
+      startWith(this.liveDiff.controls.originalText.value)
+    ),
+  }).pipe(
+    map(({ collapseLines, originalValue }) => [
+      unifiedMergeView({
+        original: originalValue,
+        mergeControls: false,
+        gutter: true,
+        collapseUnchanged: collapseLines
+          ? { margin: 3, minSize: 4 }
+          : undefined,
+      }),
+    ])
+  );
 
   constructor() {
     /* 
@@ -94,29 +144,27 @@ export class TextDiffComponent {
           });
         }
       });
-
-    /* 
-      These actions change the editor settings that cannot be changed dynamically
-      so we destroy and recreate the editor to apply the changes 
-    */
-    merge(
-      this.themeService.getTheme(),
-      this.diffSettings.controls.liveEdit.valueChanges
-    )
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.showDiff.set(!this.showDiff());
-        setTimeout(() => this.showDiff.set(!this.showDiff()));
-      });
+    // this.loadTestingData();
   }
 
   @HostListener('dragover', ['$event'])
   @HostListener('drop', ['$event'])
   allowFileDrop(e: DragEvent): void {
-    if (e.target instanceof HTMLElement && e.target.closest('code-editor')) {
+    if (
+      e.target instanceof HTMLElement &&
+      e.target.closest('app-code-editor')
+    ) {
       e.preventDefault();
       e.stopPropagation();
     }
+  }
+
+  pluralMapping(word: string) {
+    return {
+      '=0': `# ${word}s`,
+      '=1': `# ${word}`,
+      other: `# ${word}s`,
+    };
   }
 
   findDiff() {
@@ -124,18 +172,17 @@ export class TextDiffComponent {
       originalText: this.diffForm.controls.originalText.value,
       modifiedText: this.diffForm.controls.modifiedText.value,
     });
-
-    this.showDiff.set(true);
   }
 
-  renderRevertControl(): HTMLElement {
-    const revertControl = this.document.createElement('div');
-    revertControl.innerHTML = `
-      <button class="revert-control" title="Revert changes">
-        <ng-icon name="remixFileAddLine"></ng-icon>
-      </button>
-    `;
-    return revertControl;
+  swapTexts() {
+    this.diffForm.patchValue({
+      originalText: this.diffForm.controls.modifiedText.value,
+      modifiedText: this.diffForm.controls.originalText.value,
+    });
+    this.liveDiff.patchValue({
+      originalText: this.diffForm.controls.originalText.value,
+      modifiedText: this.diffForm.controls.modifiedText.value,
+    });
   }
 
   openFile(control: FormControl): void {
@@ -156,9 +203,85 @@ export class TextDiffComponent {
   }
 
   clear(): void {
-    this.showDiff.set(false);
     this.diffSettings.patchValue({ liveEdit: false }, { emitEvent: false });
     this.diffForm.patchValue({ originalText: '', modifiedText: '' });
     this.liveDiff.patchValue({ originalText: '', modifiedText: '' });
   }
+
+  getLines(text: string): number {
+    return text.split('\n').length;
+  }
+
+  getCount(text: string, from: number, to: number): number {
+    if (from === to) {
+      return 0;
+    }
+
+    const end = lineAt(text, Math.min(to, text.length)).number;
+    const start = lineAt(text, from).number;
+    if (start === end) {
+      return 1;
+    }
+
+    return end - start;
+  }
+
+  removals = this.liveDiff.controls.originalText.valueChanges.pipe(
+    startWith(this.liveDiff.controls.originalText.value),
+    map(text => this.getRemovals(text))
+  );
+  additions = this.liveDiff.controls.modifiedText.valueChanges.pipe(
+    startWith(this.liveDiff.controls.modifiedText.value),
+    map(text => this.getAdditions(text))
+  );
+
+  getAdditions(text: string): number {
+    console.log(this.diffEditor);
+    return (
+      this.diffEditor?.mergeView?.chunks.reduce(
+        (additions, chunk) =>
+          (additions += this.getCount(text, chunk.fromA, chunk.toA)),
+        0
+      ) ?? 0
+    );
+  }
+
+  getRemovals(text: string): number {
+    return (
+      this.diffEditor?.mergeView?.chunks.reduce(
+        (removals, chunk) =>
+          (removals += this.getCount(text, chunk.fromB, chunk.toB)),
+        0
+      ) ?? 0
+    );
+  }
+
+  async loadTestingData(): Promise<void> {
+    const path1 = 'assets/cipher-crack.js';
+    const path2 = 'assets/cipher.js';
+
+    const [originalText, modifiedText] = await Promise.all([
+      fetch(path1).then(response => response.text()),
+      fetch(path2).then(response => response.text()),
+    ]);
+
+    this.diffForm.patchValue({ originalText, modifiedText });
+    this.liveDiff.patchValue({ originalText, modifiedText });
+    this.changeDetector.detectChanges();
+  }
+}
+
+function lineAt(doc: string, position: number) {
+  const lines = doc.split('\n');
+  let cumulativeLength = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    cumulativeLength += lines[i].length + 1; // +1 accounts for the newline character
+    if (position < cumulativeLength) {
+      return { number: i + 1, lineText: lines[i] }; // line number is 1-based
+    }
+  }
+
+  // If position is beyond the document length, return the last line
+  return { number: lines.length, lineText: lines[lines.length - 1] };
 }
