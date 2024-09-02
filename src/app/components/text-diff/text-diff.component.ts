@@ -27,10 +27,11 @@ import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { ThemeService } from '../../services/theme.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { combineLatest, map, shareReplay, startWith, tap } from 'rxjs';
+import { combineLatest, filter, map, shareReplay, startWith, tap } from 'rxjs';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { unifiedMergeView } from '@codemirror/merge';
+import { findLine } from '@lib/strings';
 
 @Component({
   selector: 'app-text-diff',
@@ -66,18 +67,18 @@ export class TextDiffComponent {
   protected readonly document = inject(DOCUMENT);
   protected readonly themeService = inject(ThemeService);
 
-  protected readonly editorTheme = this.themeService.getTheme().pipe(
+  @ViewChild('diffEditor', { read: DiffEditorComponent })
+  private readonly diffEditor?: DiffEditorComponent;
+
+  @ViewChild('unifiedDiffEditor', { read: CodeEditorComponent })
+  private readonly unifiedDiffEditor?: CodeEditorComponent;
+
+  editorTheme = this.themeService.getTheme().pipe(
     map(theme => (theme === 'dark' ? materialDark : materialLight)),
     // Theme changes may occur outside of Angular's zone, due to the menu option, so we need to trigger change detection manually
     tap(() => setTimeout(() => this.changeDetector.detectChanges())),
     shareReplay(1)
   );
-
-  @ViewChild('diffEditor', { read: DiffEditorComponent })
-  protected readonly diffEditor?: DiffEditorComponent;
-
-  @ViewChild('unifiedDiffEditor', { read: CodeEditorComponent })
-  protected readonly unifiedDiffEditor?: CodeEditorComponent;
 
   diffSettings = new FormGroup({
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
@@ -130,22 +131,28 @@ export class TextDiffComponent {
     ])
   );
 
+  removals = this.liveDiff.controls.originalText.valueChanges.pipe(
+    startWith(this.liveDiff.controls.originalText.value),
+    map(text => this.getRemovals(text))
+  );
+
+  additions = this.liveDiff.controls.modifiedText.valueChanges.pipe(
+    startWith(this.liveDiff.controls.modifiedText.value),
+    map(text => this.getAdditions(text))
+  );
+
   constructor() {
-    /* 
-      when the live edit is disabled, update the main form with the live diff form values,
-      we do this instead of the main form values to avoid the editor from jumping the cursor 
-    */
     this.diffSettings.controls.liveEdit.valueChanges
-      .pipe(takeUntilDestroyed())
+      .pipe(
+        takeUntilDestroyed(),
+        filter(liveEdit => !!liveEdit)
+      )
       .subscribe(() => {
-        if (!this.diffSettings.controls.liveEdit.value) {
-          this.liveDiff.patchValue({
-            originalText: this.diffForm.controls.originalText.value,
-            modifiedText: this.diffForm.controls.modifiedText.value,
-          });
-        }
+        this.liveDiff.patchValue({
+          originalText: this.diffForm.controls.originalText.value,
+          modifiedText: this.diffForm.controls.modifiedText.value,
+        });
       });
-    // this.loadTestingData();
   }
 
   @HostListener('dragover', ['$event'])
@@ -218,23 +225,10 @@ export class TextDiffComponent {
       return 0;
     }
 
-    const end = lineAt(text, Math.min(to, text.length)).number;
-    const start = lineAt(text, from).number;
-    if (start === end) {
-      return 1;
-    }
-
-    return end - start;
+    const end = findLine(text, Math.min(to, text.length)).number;
+    const start = findLine(text, from).number;
+    return start === end ? 1 : end - start;
   }
-
-  removals = this.liveDiff.controls.originalText.valueChanges.pipe(
-    startWith(this.liveDiff.controls.originalText.value),
-    map(text => this.getRemovals(text))
-  );
-  additions = this.liveDiff.controls.modifiedText.valueChanges.pipe(
-    startWith(this.liveDiff.controls.modifiedText.value),
-    map(text => this.getAdditions(text))
-  );
 
   getAdditions(text: string): number {
     return (
@@ -255,19 +249,4 @@ export class TextDiffComponent {
       ) ?? 0
     );
   }
-}
-
-function lineAt(doc: string, position: number) {
-  const lines = doc.split('\n');
-  let cumulativeLength = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    cumulativeLength += lines[i].length + 1; // +1 accounts for the newline character
-    if (position < cumulativeLength) {
-      return { number: i + 1, lineText: lines[i] }; // line number is 1-based
-    }
-  }
-
-  // If position is beyond the document length, return the last line
-  return { number: lines.length, lineText: lines[lines.length - 1] };
 }
