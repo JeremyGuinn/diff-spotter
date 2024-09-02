@@ -1,46 +1,42 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
-import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class LocalStorageService extends StorageService {
-  override getItem<T>(key: string): Observable<T | null> {
+  override async getItem<T>(key: string): Promise<T | null> {
     try {
       const item = localStorage.getItem(key);
-      return of(item ? JSON.parse(item) : null);
+      return item ? JSON.parse(item) : null;
     } catch (error) {
       console.error('Error getting from local storage', error);
-      return of(null);
+      throw error;
     }
   }
 
-  override setItem<T>(key: string, value: T): Observable<boolean> {
+  override async setItem<T>(key: string, value: T): Promise<void> {
     try {
       localStorage.setItem(key, JSON.stringify(value));
-      return of(true);
     } catch (error) {
       console.error('Error setting local storage', error);
-      return of(false);
+      throw error;
     }
   }
 
-  override removeItem(key: string): Observable<boolean> {
+  override async removeItem(key: string): Promise<void> {
     try {
       localStorage.removeItem(key);
-      return of(true);
     } catch (error) {
       console.error('Error removing from local storage', error);
-      return of(false);
+      throw error;
     }
   }
 
-  override clear(): Observable<boolean> {
+  override async clear(): Promise<void> {
     try {
       localStorage.clear();
-      return of(true);
     } catch (error) {
       console.error('Error clearing local storage', error);
-      return of(false);
+      throw error;
     }
   }
 }

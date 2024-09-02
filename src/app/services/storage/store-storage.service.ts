@@ -1,13 +1,12 @@
 import { Store } from '@tauri-apps/plugin-store';
 import { StorageService } from './storage.service';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
-import { catchError, from, map, Observable, of, tap } from 'rxjs';
 
 export const STORE_CONFIGURATION = new InjectionToken<StoreConfiguration>(
   'STORE_CONFIGURATION'
 );
 
-interface StoreConfiguration {
+export interface StoreConfiguration {
   saveOnSet: boolean;
   autoSaveIntervalSeconds?: number;
 }
@@ -28,36 +27,49 @@ export class StoreStorageService extends StorageService {
     }
   }
 
-  override getItem<T>(key: string): Observable<T | null> {
-    return from(this.store.get(key)).pipe(
-      map(value => {
-        return value as T;
-      }),
-      catchError(() => of(null))
-    );
+  override async getItem<T>(key: string): Promise<T | null> {
+    try {
+      const value = await this.store.get<T>(key);
+      return value ?? null;
+    } catch (error) {
+      console.error('Error getting from store', error);
+      return null;
+    }
   }
 
-  override setItem<T>(key: string, value: T): Observable<boolean> {
-    return from(this.store.set(key, value)).pipe(
-      tap(() => this.storeConfiguration.saveOnSet && this.store.save()),
-      map(() => true),
-      catchError(() => of(false))
-    );
+  override async setItem<T>(key: string, value: T): Promise<void> {
+    try {
+      await this.store.set(key, value);
+      if (this.storeConfiguration.saveOnSet) {
+        await this.store.save();
+      }
+    } catch (error) {
+      console.error('Error setting store item', error);
+      throw error;
+    }
   }
 
-  override removeItem(key: string): Observable<boolean> {
-    return from(this.store.delete(key)).pipe(
-      tap(() => this.storeConfiguration.saveOnSet && this.store.save()),
-      map(() => true),
-      catchError(() => of(false))
-    );
+  override async removeItem(key: string): Promise<void> {
+    try {
+      await this.store.delete(key);
+      if (this.storeConfiguration.saveOnSet) {
+        await this.store.save();
+      }
+    } catch (error) {
+      console.error('Error removing store item', error);
+      throw error;
+    }
   }
 
-  override clear(): Observable<boolean> {
-    return from(this.store.clear()).pipe(
-      tap(() => this.storeConfiguration.saveOnSet && this.store.save()),
-      map(() => true),
-      catchError(() => of(false))
-    );
+  override async clear(): Promise<void> {
+    try {
+      await this.store.reset();
+      if (this.storeConfiguration.saveOnSet) {
+        await this.store.save();
+      }
+    } catch (error) {
+      console.error('Error clearing store', error);
+      throw error;
+    }
   }
 }

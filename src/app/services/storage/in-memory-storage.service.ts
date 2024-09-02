@@ -1,45 +1,44 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
-import { Observable, of } from 'rxjs';
 
 @Injectable()
 export class InMemoryStorageService extends StorageService {
   private readonly storage = new Map<string, unknown>();
 
-  override getItem<T>(key: string): Observable<T | null> {
+  override async getItem<T>(key: string): Promise<T | null> {
     try {
       const value = this.storage.get(key);
-      return of(value ? (value as T) : null);
+      return value ? (value as T) : null;
     } catch (error) {
       console.error('Error getting from in-memory storage', error);
-      return of(null);
+      throw error;
     }
   }
-  override setItem<T>(key: string, value: T): Observable<boolean> {
+
+  override async setItem<T>(key: string, value: T): Promise<void> {
     try {
       this.storage.set(key, value);
-      return of(true);
     } catch (error) {
       console.error('Error setting in-memory storage', error);
-      return of(false);
+      throw error;
     }
   }
-  override removeItem(key: string): Observable<boolean> {
+
+  override async removeItem(key: string): Promise<void> {
     try {
       this.storage.delete(key);
-      return of(true);
     } catch (error) {
       console.error('Error removing from in-memory storage', error);
-      return of(false);
+      throw error;
     }
   }
-  override clear(): Observable<boolean> {
+
+  override async clear(): Promise<void> {
     try {
       this.storage.clear();
-      return of(true);
     } catch (error) {
       console.error('Error clearing in-memory storage', error);
-      return of(false);
+      throw error;
     }
   }
 }

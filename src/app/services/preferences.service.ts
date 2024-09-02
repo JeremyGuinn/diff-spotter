@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
-  catchError,
+  firstValueFrom,
   Observable,
   of,
   switchMap,
-  tap,
+  take,
 } from 'rxjs';
 import { StorageService } from './storage/storage.service';
 
@@ -21,65 +21,58 @@ export class PreferencesService<T extends object> {
   >();
 
   public getPreferences(key: string): Observable<T | null> {
-    let preferenceSubject = this.preferencesSubjects.get(key);
-
-    if (!preferenceSubject) {
-      preferenceSubject = new BehaviorSubject<T | null>(null);
-      this.preferencesSubjects.set(key, preferenceSubject);
-
-      this.storage.getItem<T>(key).subscribe(value => {
-        preferenceSubject!.next(value);
-      });
+    if (!this.preferencesSubjects.has(key)) {
+      this.preferencesSubjects.set(key, new BehaviorSubject<T | null>(null));
     }
+
+    const preferenceSubject = this.preferencesSubjects.get(key)!;
+
+    this.storage.getItem<T>(key).then(preferences => {
+      preferenceSubject.next(preferences);
+    });
 
     return preferenceSubject.asObservable();
   }
 
-  public setPreferences(key: string, preferences: T) {
-    return this.storage.setItem(key, preferences).pipe(
-      tap(success => {
-        if (success) {
-          this.preferencesSubjects.get(key)?.next(preferences);
-        }
-      }),
-      catchError(() => of(false))
-    );
+  public async setPreferences(key: string, preferences: T): Promise<void> {
+    await this.storage.setItem(key, preferences);
+
+    const preferenceSubject = this.preferencesSubjects.get(key);
+    if (preferenceSubject) {
+      preferenceSubject.next(preferences);
+    }
   }
 
-  public clearPreferences(key: string) {
-    return this.storage.removeItem(key).pipe(
-      tap(success => {
-        if (success) {
-          this.preferencesSubjects.get(key)?.next(null);
-        }
-      }),
-      catchError(() => of(false))
-    );
+  public clearPreferences(key: string): Promise<void> {
+    this.preferencesSubjects.delete(key);
+    return this.storage.removeItem(key);
   }
 
   public updatePreferences(
     key: string,
     partialPreferences: Partial<T>
-  ): Observable<boolean> {
-    return this.getPreferences(key).pipe(
-      switchMap(existingPreferences => {
-        if (!existingPreferences) {
-          return of(false);
-        }
+  ): Promise<void> {
+    return firstValueFrom(
+      this.getPreferences(key).pipe(
+        take(1),
+        switchMap(existingPreferences => {
+          if (!existingPreferences) {
+            return of();
+          }
 
-        return this.setPreferences(key, {
-          ...existingPreferences,
-          ...partialPreferences,
-        });
-      }),
-      catchError(() => of(false))
+          return this.setPreferences(key, {
+            ...existingPreferences,
+            ...partialPreferences,
+          });
+        })
+      )
     );
   }
 
   public ensurePreferences(
     key: string,
     defaultPreferences: T
-  ): Observable<boolean> {
+  ): Observable<void> {
     return this.getPreferences(key).pipe(
       switchMap(preferences => {
         if (
@@ -92,9 +85,8 @@ export class PreferencesService<T extends object> {
           );
         }
 
-        return of(true);
-      }),
-      catchError(() => of(false))
+        return of();
+      })
     );
   }
 

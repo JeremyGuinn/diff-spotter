@@ -6,7 +6,6 @@ import {
   map,
   Observable,
   startWith,
-  take,
   tap,
 } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
@@ -71,10 +70,7 @@ export class ThemeService {
     }
 
     this.applyTheme(theme);
-    this.preferenceService
-      .setPreferences(this.THEME_PREFERENCE_KEY, { theme })
-      .pipe(take(1))
-      .subscribe();
+    this.preferenceService.setPreferences(this.THEME_PREFERENCE_KEY, { theme });
   }
 
   private getSystemTheme(): Observable<Theme> {
