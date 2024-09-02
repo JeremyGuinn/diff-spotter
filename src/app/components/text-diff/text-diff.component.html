@@ -1,7 +1,7 @@
 <div class="flex h-full">
   <div
     class="drawer drawer-open h-full flex-1"
-    *ngIf="showDiff() || diffForm.controls.liveEdit.value">
+    *ngIf="showDiff() || diffSettings.controls.liveEdit.value">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-side h-full">
       <label
@@ -27,7 +27,7 @@
           <input
             type="checkbox"
             class="toggle toggle-sm"
-            [formControl]="diffForm.controls.liveEdit" />
+            [formControl]="diffSettings.controls.liveEdit" />
         </div>
 
         <div class="flex items-center justify-between gap-2">
@@ -35,7 +35,7 @@
           <input
             type="checkbox"
             class="toggle toggle-sm"
-            [formControl]="diffForm.controls.unifiedDiff" />
+            [formControl]="diffSettings.controls.unifiedDiff" />
         </div>
 
         <div class="flex items-center justify-between gap-2">
@@ -43,7 +43,7 @@
           <input
             type="checkbox"
             class="toggle toggle-sm"
-            [formControl]="diffForm.controls.collapseLines" />
+            [formControl]="diffSettings.controls.collapseLines" />
         </div>
       </div>
     </div>
@@ -67,35 +67,41 @@
     </div>
 
     <div
-      *ngIf="showDiff() || diffForm.controls.liveEdit.value"
+      *ngIf="showDiff() || diffSettings.controls.liveEdit.value"
       class="mt-4 rounded-md">
       <div class="mt-2">
         <diff-editor
           *ngIf="showDiff()"
           [originalExtensions]="[
             editorTheme(),
-            EditorState.readOnly.of(!diffForm.controls.liveEdit.value),
-            EditorView.editable.of(diffForm.controls.liveEdit.value),
+            EditorState.readOnly.of(!diffSettings.controls.liveEdit.value),
+            EditorView.editable.of(diffSettings.controls.liveEdit.value),
           ]"
           [modifiedExtensions]="[
             editorTheme(),
-            EditorState.readOnly.of(!diffForm.controls.liveEdit.value),
-            EditorView.editable.of(diffForm.controls.liveEdit.value),
+            EditorState.readOnly.of(!diffSettings.controls.liveEdit.value),
+            EditorView.editable.of(diffSettings.controls.liveEdit.value),
           ]"
-          [style.height.px]="diffForm.controls.liveEdit.value ? 700 : 300"
-          [collapseUnchanged]="{ margin: 3, minSize: 4 }"
-          [originalValue]="diffForm.controls.originalText.value"
-          [modifiedValue]="diffForm.controls.modifiedText.value"
+          [style.height.px]="diffSettings.controls.liveEdit.value ? 700 : 300"
+          [collapseUnchanged]="
+            diffSettings.controls.collapseLines.value
+              ? { margin: 3, minSize: 4 }
+              : undefined
+          "
+          [originalValue]="liveDiff.controls.originalText.value"
+          [modifiedValue]="liveDiff.controls.modifiedText.value"
           (modifiedValueChange)="
-            liveDiff.controls.modifiedText.setValue($event)
+            diffForm.controls.modifiedText.setValue($event)
           "
           (originalValueChange)="
-            liveDiff.controls.originalText.setValue($event)
+            diffForm.controls.originalText.setValue($event)
           "></diff-editor>
       </div>
     </div>
 
-    <div class="flex flex-wrap gap-3" *ngIf="!diffForm.controls.liveEdit.value">
+    <div
+      class="flex flex-wrap gap-3"
+      *ngIf="!diffSettings.controls.liveEdit.value">
       <div class="min-w-96 flex-1">
         <div class="flex content-center items-center justify-between">
           <label class="label" for="originalText">Original Text</label>
@@ -109,7 +115,8 @@
         <code-editor
           [formControl]="diffForm.controls.originalText"
           [theme]="editorTheme()"
-          [style.height.px]="300">
+          [style.height.px]="300"
+          data-control="originalText">
         </code-editor>
       </div>
 
@@ -127,15 +134,15 @@
           [formControl]="diffForm.controls.modifiedText"
           [theme]="editorTheme()"
           [style.height.px]="300"
-          #modifiedEditor>
+          data-control="modifiedText">
         </code-editor>
       </div>
     </div>
 
     <button
       class="btn btn-primary w-full"
-      (click)="showDiff.set(true)"
-      *ngIf="!diffForm.controls.liveEdit.value">
+      (click)="findDiff()"
+      *ngIf="!diffSettings.controls.liveEdit.value">
       Find Differences
     </button>
   </div>

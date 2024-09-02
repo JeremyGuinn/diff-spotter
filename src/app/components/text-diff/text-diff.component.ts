@@ -61,12 +61,15 @@ export class TextDiffComponent {
     this.theme() === 'dark' ? materialDark : materialLight
   );
 
-  diffForm = new FormGroup({
-    originalText: new FormControl<string>('', { nonNullable: true }),
-    modifiedText: new FormControl<string>('', { nonNullable: true }),
+  diffSettings = new FormGroup({
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
     unifiedDiff: new FormControl<boolean>(false, { nonNullable: true }),
     collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
+  });
+
+  diffForm = new FormGroup({
+    originalText: new FormControl<string>('', { nonNullable: true }),
+    modifiedText: new FormControl<string>('', { nonNullable: true }),
   });
 
   liveDiff = new FormGroup({
@@ -81,16 +84,14 @@ export class TextDiffComponent {
       when the live edit is disabled, update the main form with the live diff form values,
       we do this instead of the main form values to avoid the editor from jumping the cursor 
     */
-    this.diffForm.controls.liveEdit.valueChanges
+    this.diffSettings.controls.liveEdit.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
-        if (!this.diffForm.controls.liveEdit.value) {
-          this.diffForm.controls.originalText.setValue(
-            this.liveDiff.controls.originalText.value
-          );
-          this.diffForm.controls.modifiedText.setValue(
-            this.liveDiff.controls.modifiedText.value
-          );
+        if (!this.diffSettings.controls.liveEdit.value) {
+          this.liveDiff.patchValue({
+            originalText: this.diffForm.controls.originalText.value,
+            modifiedText: this.diffForm.controls.modifiedText.value,
+          });
         }
       });
 
@@ -100,7 +101,7 @@ export class TextDiffComponent {
     */
     merge(
       this.themeService.getTheme(),
-      this.diffForm.controls.liveEdit.valueChanges
+      this.diffSettings.controls.liveEdit.valueChanges
     )
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
@@ -110,11 +111,21 @@ export class TextDiffComponent {
   }
 
   @HostListener('dragover', ['$event'])
+  @HostListener('drop', ['$event'])
   allowFileDrop(e: DragEvent): void {
     if (e.target instanceof HTMLElement && e.target.closest('code-editor')) {
       e.preventDefault();
       e.stopPropagation();
     }
+  }
+
+  findDiff() {
+    this.liveDiff.patchValue({
+      originalText: this.diffForm.controls.originalText.value,
+      modifiedText: this.diffForm.controls.modifiedText.value,
+    });
+
+    this.showDiff.set(true);
   }
 
   renderRevertControl(): HTMLElement {
@@ -145,18 +156,9 @@ export class TextDiffComponent {
   }
 
   clear(): void {
-    this.diffForm.patchValue(
-      {
-        originalText: '',
-        modifiedText: '',
-        liveEdit: false,
-      },
-      { emitEvent: false }
-    );
-    this.liveDiff.patchValue({
-      originalText: '',
-      modifiedText: '',
-    });
     this.showDiff.set(false);
+    this.diffSettings.patchValue({ liveEdit: false }, { emitEvent: false });
+    this.diffForm.patchValue({ originalText: '', modifiedText: '' });
+    this.liveDiff.patchValue({ originalText: '', modifiedText: '' });
   }
 }
