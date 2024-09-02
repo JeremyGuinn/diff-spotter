@@ -1,5 +1,7 @@
 <div class="flex h-full">
-  <div class="drawer drawer-open h-full flex-1">
+  <div
+    class="drawer drawer-open h-full flex-1"
+    *ngIf="showDiff() || diffForm.controls.liveEdit.value">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-side h-full">
       <label
@@ -12,7 +14,7 @@
           <input
             type="checkbox"
             class="toggle toggle-sm"
-            [checked]="(theme | async) === 'dark'"
+            [checked]="theme() === 'dark'"
             (change)="
               themeService.setTheme(
                 $any($event.target).checked ? 'dark' : 'light'
@@ -65,24 +67,31 @@
     </div>
 
     <div
-      *ngIf="showDiff || diffForm.controls.liveEdit.value"
+      *ngIf="showDiff() || diffForm.controls.liveEdit.value"
       class="mt-4 rounded-md">
       <div class="mt-2">
-        <ng-container *ngIf="!diffForm.controls.liveEdit.value">
-          <ng-container
-            *ngTemplateOutlet="
-              diffEditorTemplate;
-              context: { readonly: true }
-            "></ng-container>
-        </ng-container>
-
-        <ng-container *ngIf="diffForm.controls.liveEdit.value">
-          <ng-container
-            *ngTemplateOutlet="
-              diffEditorTemplate;
-              context: { readonly: false }
-            "></ng-container>
-        </ng-container>
+        <diff-editor
+          *ngIf="showDiff()"
+          [originalExtensions]="[
+            editorTheme(),
+            EditorState.readOnly.of(!diffForm.controls.liveEdit.value),
+            EditorView.editable.of(diffForm.controls.liveEdit.value),
+          ]"
+          [modifiedExtensions]="[
+            editorTheme(),
+            EditorState.readOnly.of(!diffForm.controls.liveEdit.value),
+            EditorView.editable.of(diffForm.controls.liveEdit.value),
+          ]"
+          [style.height.px]="diffForm.controls.liveEdit.value ? 700 : 300"
+          [collapseUnchanged]="{ margin: 3, minSize: 4 }"
+          [originalValue]="diffForm.controls.originalText.value"
+          [modifiedValue]="diffForm.controls.modifiedText.value"
+          (modifiedValueChange)="
+            liveDiff.controls.modifiedText.setValue($event)
+          "
+          (originalValueChange)="
+            liveDiff.controls.originalText.setValue($event)
+          "></diff-editor>
       </div>
     </div>
 
@@ -99,7 +108,7 @@
         </div>
         <code-editor
           [formControl]="diffForm.controls.originalText"
-          [theme]="(editorTheme | async)!"
+          [theme]="editorTheme()"
           [style.height.px]="300">
         </code-editor>
       </div>
@@ -116,32 +125,18 @@
         </div>
         <code-editor
           [formControl]="diffForm.controls.modifiedText"
-          [theme]="(editorTheme | async)!"
+          [theme]="editorTheme()"
           [style.height.px]="300"
           #modifiedEditor>
         </code-editor>
       </div>
     </div>
 
-    <button class="btn btn-primary w-full" (click)="showDiff = true">
+    <button
+      class="btn btn-primary w-full"
+      (click)="showDiff.set(true)"
+      *ngIf="!diffForm.controls.liveEdit.value">
       Find Differences
     </button>
   </div>
-
-  <ng-template #diffEditorTemplate let-readonly="readonly">
-    <diff-editor
-      [originalExtensions]="[
-        (editorTheme | async)!,
-        EditorState.readOnly.of(readonly),
-      ]"
-      [modifiedExtensions]="[
-        (editorTheme | async)!,
-        EditorState.readOnly.of(readonly),
-      ]"
-      [style.height.px]="300"
-      [collapseUnchanged]="{ margin: 3, minSize: 4 }"
-      [(originalValue)]="diffForm.controls.originalText.value"
-      [(modifiedValue)]="diffForm.controls.modifiedText.value">
-    </diff-editor>
-  </ng-template>
 </div>

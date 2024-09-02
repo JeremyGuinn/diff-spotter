@@ -2,8 +2,10 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   HostListener,
   inject,
+  signal,
 } from '@angular/core';
 import {
   FormControl,
@@ -20,8 +22,10 @@ import {
 import { CodeEditor, DiffEditor } from '@acrodata/code-editor';
 import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
 import { EditorState } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
 import { ThemeService } from '../../services/theme.service';
-import { map, shareReplay } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { merge } from 'rxjs';
 
 @Component({
   selector: 'app-text-diff',
@@ -46,15 +50,15 @@ import { map, shareReplay } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextDiffComponent {
+  protected readonly EditorState = EditorState;
+  protected readonly EditorView = EditorView;
+
   protected readonly document = inject(DOCUMENT);
   protected readonly themeService = inject(ThemeService);
 
-  protected readonly EditorState = EditorState;
-  protected readonly theme = this.themeService.getTheme().pipe(shareReplay(1));
-
-  protected readonly editorTheme = this.theme.pipe(
-    map(theme => (theme === 'dark' ? materialDark : materialLight)),
-    shareReplay(1)
+  protected readonly theme = toSignal(this.themeService.getTheme());
+  protected readonly editorTheme = computed(() =>
+    this.theme() === 'dark' ? materialDark : materialLight
   );
 
   diffForm = new FormGroup({
@@ -65,7 +69,45 @@ export class TextDiffComponent {
     collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
-  showDiff: boolean = false;
+  liveDiff = new FormGroup({
+    originalText: new FormControl<string>('', { nonNullable: true }),
+    modifiedText: new FormControl<string>('', { nonNullable: true }),
+  });
+
+  showDiff = signal(false);
+
+  constructor() {
+    /* 
+      when the live edit is disabled, update the main form with the live diff form values,
+      we do this instead of the main form values to avoid the editor from jumping the cursor 
+    */
+    this.diffForm.controls.liveEdit.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (!this.diffForm.controls.liveEdit.value) {
+          this.diffForm.controls.originalText.setValue(
+            this.liveDiff.controls.originalText.value
+          );
+          this.diffForm.controls.modifiedText.setValue(
+            this.liveDiff.controls.modifiedText.value
+          );
+        }
+      });
+
+    /* 
+      These actions change the editor settings that cannot be changed dynamically
+      so we destroy and recreate the editor to apply the changes 
+    */
+    merge(
+      this.themeService.getTheme(),
+      this.diffForm.controls.liveEdit.valueChanges
+    )
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.showDiff.set(!this.showDiff());
+        setTimeout(() => this.showDiff.set(!this.showDiff()));
+      });
+  }
 
   @HostListener('dragover', ['$event'])
   allowFileDrop(e: DragEvent): void {
@@ -103,7 +145,18 @@ export class TextDiffComponent {
   }
 
   clear(): void {
-    this.diffForm.reset();
-    this.showDiff = false;
+    this.diffForm.patchValue(
+      {
+        originalText: '',
+        modifiedText: '',
+        liveEdit: false,
+      },
+      { emitEvent: false }
+    );
+    this.liveDiff.patchValue({
+      originalText: '',
+      modifiedText: '',
+    });
+    this.showDiff.set(false);
   }
 }
