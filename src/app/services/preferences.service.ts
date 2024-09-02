@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   firstValueFrom,
+  from,
+  map,
   Observable,
   of,
   switchMap,
@@ -27,11 +29,14 @@ export class PreferencesService<T extends object> {
 
     const preferenceSubject = this.preferencesSubjects.get(key)!;
 
-    this.storage.getItem<T>(key).then(preferences => {
-      preferenceSubject.next(preferences);
-    });
-
-    return preferenceSubject.asObservable();
+    return from(this.storage.getItem<T>(key)).pipe(
+      map(preferences => {
+        if (preferences !== null) {
+          preferenceSubject.next(preferences);
+        }
+      }),
+      switchMap(() => preferenceSubject.asObservable())
+    );
   }
 
   public async setPreferences(key: string, preferences: T): Promise<void> {
