@@ -10,7 +10,7 @@ module.exports = {
           ...require('daisyui/src/theming/themes')['emerald'],
         },
         dark: {
-          ...require('daisyui/src/theming/themes')['dim'],
+          ...require('daisyui/src/theming/themes')['night'],
         },
       },
     ],

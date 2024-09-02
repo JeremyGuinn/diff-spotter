@@ -6,7 +6,6 @@ import {
   map,
   Observable,
   startWith,
-  tap,
 } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 
@@ -48,16 +47,10 @@ export class ThemeService {
     const themeFromSystem = this.getSystemTheme();
     const themePrefs = this.preferenceService
       .getPreferences(this.THEME_PREFERENCE_KEY)
-      .pipe(
-        map(theme => theme?.theme || 'system'),
-        tap(theme => console.log('themeService: ', theme))
-      );
+      .pipe(map(theme => theme?.theme || 'system'));
 
     // listen to the user's preference, if changes to 'system' then listen to system theme, otherwise apply the user's preference
     return combineLatest([themePrefs, themeFromSystem]).pipe(
-      tap(([theme, systemTheme]) =>
-        console.log('combineLatest: ', theme, systemTheme)
-      ),
       map(([theme, systemTheme]) => (theme === 'system' ? systemTheme : theme))
     );
   }

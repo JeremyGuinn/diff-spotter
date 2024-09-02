@@ -11,8 +11,6 @@ import { TextDiffComponent } from './components/text-diff/text-diff.component';
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  constructor() {}
-
   @HostListener('window:dragover', ['$event'])
   preventFileDrop(e: DragEvent): void {
     if (e) {
