@@ -62,7 +62,7 @@
           <div class="flex items-center gap-1 font-semibold text-red-700">
             <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
             <span>
-              {{ stats.additions | i18nPlural: pluralMapping('removal') }}
+              {{ stats.removals | i18nPlural: pluralMapping('removal') }}
             </span>
           </div>
           <div class="flex items-center gap-2">
@@ -137,7 +137,8 @@
             [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
             data-control="originalText"
-            minHeight="300px">
+            minHeight="300px"
+            [style.height.px]="300">
           </app-code-editor>
         </div>
 
@@ -156,7 +157,8 @@
             [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
             data-control="modifiedText"
-            minHeight="300px">
+            minHeight="300px"
+            [style.height.px]="300">
           </app-code-editor>
         </div>
       </div>

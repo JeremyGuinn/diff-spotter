@@ -28,6 +28,7 @@ import { ThemeService } from '../../services/theme.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   combineLatest,
+  delay,
   filter,
   map,
   ReplaySubject,
@@ -38,6 +39,7 @@ import {
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { MergeView, unifiedMergeView } from '@codemirror/merge';
+import { countAffectedLines } from '@lib/diffs';
 
 @Component({
   selector: 'app-text-diff',
@@ -145,16 +147,31 @@ export class TextDiffComponent {
       startWith(this.liveDiff.controls.modifiedText.value)
     ),
   }).pipe(
-    map(() => ({
-      additions: 0,
-      removals: 0,
-      totalOriginalLines:
-        this.liveDiff.controls.originalText.value.split('\n').length,
-      totalModifiedLines:
-        this.liveDiff.controls.modifiedText.value.split('\n').length,
-    })),
-    tap(console.log),
-    tap(() => setTimeout(() => this.changeDetector.detectChanges()))
+    delay(0),
+    map(({ view }) => {
+      const removals = countAffectedLines(
+        this.liveDiff.controls.originalText.value,
+        view?.chunks ?? [],
+        'A',
+        { lineEnding: '\n' }
+      );
+
+      const additions = countAffectedLines(
+        this.liveDiff.controls.modifiedText.value,
+        view?.chunks ?? [],
+        'B',
+        { lineEnding: '\n' }
+      );
+
+      return {
+        removals: removals,
+        totalOriginalLines:
+          this.liveDiff.controls.originalText.value.split('\n').length,
+        additions: additions,
+        totalModifiedLines:
+          this.liveDiff.controls.modifiedText.value.split('\n').length,
+      };
+    })
   );
 
   constructor() {
@@ -223,9 +240,10 @@ export class TextDiffComponent {
       originalText: this.diffForm.controls.modifiedText.value,
       modifiedText: this.diffForm.controls.originalText.value,
     });
+
     this.liveDiff.patchValue({
-      originalText: this.diffForm.controls.originalText.value,
-      modifiedText: this.diffForm.controls.modifiedText.value,
+      originalText: this.liveDiff.controls.modifiedText.value,
+      modifiedText: this.liveDiff.controls.originalText.value,
     });
   }
 
