@@ -21,5 +21,6 @@
     "editor.formatOnSave": true
   },
   "editor.suggest.snippetsPreventQuickSuggestions": false,
-  "editor.inlineSuggest.enabled": true
+  "editor.inlineSuggest.enabled": true,
+  "files.eol": "\n"
 }
