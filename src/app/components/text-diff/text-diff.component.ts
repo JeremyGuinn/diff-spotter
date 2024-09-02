@@ -37,8 +37,7 @@ import {
 } from 'rxjs';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
-import { Chunk, MergeView, unifiedMergeView } from '@codemirror/merge';
-import { findLine } from '@lib/strings';
+import { MergeView, unifiedMergeView } from '@codemirror/merge';
 
 @Component({
   selector: 'app-text-diff',
@@ -118,13 +117,13 @@ export class TextDiffComponent {
     collapseLines: this.diffSettings.controls.collapseLines.valueChanges.pipe(
       startWith(this.diffSettings.controls.collapseLines.value)
     ),
-    originalValue: this.liveDiff.controls.originalText.valueChanges.pipe(
-      startWith(this.liveDiff.controls.originalText.value)
+    originalValue: this.diffForm.controls.originalText.valueChanges.pipe(
+      startWith(this.diffForm.controls.originalText.value)
     ),
   }).pipe(
-    map(({ collapseLines, originalValue }) => [
+    map(({ collapseLines }) => [
       unifiedMergeView({
-        original: originalValue,
+        original: this.diffForm.controls.originalText.value,
         mergeControls: false,
         gutter: true,
         collapseUnchanged: collapseLines
@@ -134,25 +133,28 @@ export class TextDiffComponent {
     ])
   );
 
-  stats = combineLatest({
-    diffMergeView: this.diffMergeView.pipe(filter(view => !!view)),
-    modifiedText: this.liveDiff.controls.modifiedText.valueChanges.pipe(
-      startWith(this.liveDiff.controls.modifiedText.value)
+  diffStats = combineLatest({
+    view: this.diffMergeView.pipe(
+      filter(view => !!view),
+      startWith(null)
     ),
     originalText: this.liveDiff.controls.originalText.valueChanges.pipe(
       startWith(this.liveDiff.controls.originalText.value)
     ),
+    modifiedText: this.liveDiff.controls.modifiedText.valueChanges.pipe(
+      startWith(this.liveDiff.controls.modifiedText.value)
+    ),
   }).pipe(
-    map(({ diffMergeView, modifiedText, originalText }) => {
-      const additions = this.getAdditions(diffMergeView.chunks, modifiedText);
-      const removals = this.getRemovals(diffMergeView.chunks, originalText);
-      const originalTextLines = originalText.split('\n').length;
-      const modifiedTextLines = modifiedText.split('\n').length;
-
-      return { additions, removals, originalTextLines, modifiedTextLines };
-    }),
-    shareReplay(1),
-    tap(() => this.changeDetector.detectChanges())
+    map(() => ({
+      additions: 0,
+      removals: 0,
+      totalOriginalLines:
+        this.liveDiff.controls.originalText.value.split('\n').length,
+      totalModifiedLines:
+        this.liveDiff.controls.modifiedText.value.split('\n').length,
+    })),
+    tap(console.log),
+    tap(() => setTimeout(() => this.changeDetector.detectChanges()))
   );
 
   constructor() {
@@ -237,31 +239,5 @@ export class TextDiffComponent {
     const reader = new FileReader();
     reader.onload = () => control.setValue(reader.result);
     reader.readAsText(file);
-  }
-
-  private getAdditions(chunks: readonly Chunk[], text: string): number {
-    let additions = 0;
-    for (const chunk of chunks) {
-      additions += this.getCount(text, chunk.fromA, chunk.toA);
-    }
-    return additions;
-  }
-
-  private getRemovals(chunks: readonly Chunk[], text: string): number {
-    let removals = 0;
-    for (const chunk of chunks) {
-      removals += this.getCount(text, chunk.fromB, chunk.toB);
-    }
-    return removals;
-  }
-
-  private getCount(text: string, from: number, to: number): number {
-    if (from === to) {
-      return 0;
-    }
-
-    const end = findLine(text, Math.min(to, text.length)).number;
-    const start = findLine(text, from).number;
-    return start === end ? 1 : end - start;
   }
 }

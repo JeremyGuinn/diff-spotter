@@ -62,7 +62,7 @@ export class CodeEditorComponent
   }
 
   override ngOnChanges(changes: SimpleChanges): void {
-    const staticSettings = ['languages'];
+    const staticSettings = ['languages', 'extensions'];
     const staticSettingsUpdated = Object.entries(changes).some(
       ([key, value]) => staticSettings.includes(key) && !value.firstChange
     );

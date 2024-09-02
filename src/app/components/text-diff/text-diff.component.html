@@ -56,19 +56,19 @@
       diffSettings.controls.liveEdit.value
     ) {
       <div
+        *ngIf="diffStats | async as stats"
         class="border-b-grap-200 flex justify-between gap-3 border-b-2 p-2 dark:border-b-gray-600">
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-1 font-semibold text-red-700">
             <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
-            <span>{{
-              (stats | async)?.removals | i18nPlural: pluralMapping('removal')
-            }}</span>
+            <span>
+              {{ stats.additions | i18nPlural: pluralMapping('removal') }}
+            </span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-gray-400">{{
-              (stats | async)?.originalTextLines
-                | i18nPlural: pluralMapping('line')
-            }}</span>
+            <span class="text-gray-400">
+              {{ stats.totalOriginalLines | i18nPlural: pluralMapping('line') }}
+            </span>
             <button class="btn btn-ghost btn-sm">Copy</button>
           </div>
         </div>
@@ -80,15 +80,14 @@
         <div class="flex flex-1 items-center justify-between">
           <div class="flex items-center gap-1 font-semibold text-green-700">
             <ng-icon name="remixAddCircleFill"></ng-icon>
-            <span>{{
-              (stats | async)?.additions | i18nPlural: pluralMapping('addition')
-            }}</span>
+            <span>
+              {{ stats.additions | i18nPlural: pluralMapping('addition') }}
+            </span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-gray-400">{{
-              (stats | async)?.modifiedTextLines
-                | i18nPlural: pluralMapping('line')
-            }}</span>
+            <span class="text-gray-400">
+              {{ stats.totalModifiedLines | i18nPlural: pluralMapping('line') }}
+            </span>
             <button class="btn btn-ghost btn-sm">Copy</button>
           </div>
         </div>
