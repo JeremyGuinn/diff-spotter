@@ -69,9 +69,7 @@
             <span class="text-gray-400">
               {{ stats.totalOriginalLines | i18nPlural: pluralMapping('line') }}
             </span>
-            <app-copy-button
-              [text]="liveDiff.controls.originalText.value"
-              classes="btn btn-ghost btn-sm">
+            <app-copy-button [text]="liveDiff.controls.originalText.value">
             </app-copy-button>
           </div>
         </div>
@@ -92,8 +90,7 @@
               {{ stats.totalModifiedLines | i18nPlural: pluralMapping('line') }}
             </span>
             <app-copy-button
-              [text]="liveDiff.controls.modifiedText.value"
-              classes="btn btn-ghost btn-sm"></app-copy-button>
+              [text]="liveDiff.controls.modifiedText.value"></app-copy-button>
           </div>
         </div>
       </div>

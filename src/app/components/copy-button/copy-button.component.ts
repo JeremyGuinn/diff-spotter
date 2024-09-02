@@ -19,7 +19,7 @@ import {
 })
 export class CopyButtonComponent {
   @Input() text?: string;
-  @Input() classes?: string;
+  @Input() classes?: string = 'btn btn-sm btn-ghost';
 
   disabled = signal(false);
   buttonText = signal('Copy');

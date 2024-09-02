@@ -142,24 +142,24 @@ export class TextDiffComponent {
       filter(view => !!view),
       startWith(null)
     ),
-    originalText: this.liveDiff.controls.originalText.valueChanges.pipe(
-      startWith(this.liveDiff.controls.originalText.value)
+    originalText: this.diffForm.controls.originalText.valueChanges.pipe(
+      startWith(this.diffForm.controls.originalText.value)
     ),
-    modifiedText: this.liveDiff.controls.modifiedText.valueChanges.pipe(
-      startWith(this.liveDiff.controls.modifiedText.value)
+    modifiedText: this.diffForm.controls.modifiedText.valueChanges.pipe(
+      startWith(this.diffForm.controls.modifiedText.value)
     ),
   }).pipe(
     delay(0),
     map(({ view }) => {
       const removals = countAffectedLines(
-        this.liveDiff.controls.originalText.value,
+        this.diffForm.controls.originalText.value,
         view?.chunks ?? [],
         'A',
         { lineEnding: '\n' }
       );
 
       const additions = countAffectedLines(
-        this.liveDiff.controls.modifiedText.value,
+        this.diffForm.controls.modifiedText.value,
         view?.chunks ?? [],
         'B',
         { lineEnding: '\n' }
@@ -168,10 +168,10 @@ export class TextDiffComponent {
       return {
         removals: removals,
         totalOriginalLines:
-          this.liveDiff.controls.originalText.value.split('\n').length,
+          this.diffForm.controls.originalText.value.split('\n').length,
         additions: additions,
         totalModifiedLines:
-          this.liveDiff.controls.modifiedText.value.split('\n').length,
+          this.diffForm.controls.modifiedText.value.split('\n').length,
       };
     })
   );
@@ -238,14 +238,13 @@ export class TextDiffComponent {
   }
 
   swapTexts() {
-    this.diffForm.patchValue({
+    this.liveDiff.patchValue({
       originalText: this.diffForm.controls.modifiedText.value,
       modifiedText: this.diffForm.controls.originalText.value,
     });
-
-    this.liveDiff.patchValue({
-      originalText: this.liveDiff.controls.modifiedText.value,
-      modifiedText: this.liveDiff.controls.originalText.value,
+    this.diffForm.patchValue({
+      originalText: this.diffForm.controls.modifiedText.value,
+      modifiedText: this.diffForm.controls.originalText.value,
     });
   }
 
