@@ -18,8 +18,10 @@ import {
   remixSaveLine,
 } from '@ng-icons/remixicon';
 import { CodeEditor, DiffEditor } from '@acrodata/code-editor';
-import { material } from '@uiw/codemirror-theme-material';
+import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
 import { EditorState } from '@codemirror/state';
+import { ThemeService } from '../../services/theme.service';
+import { map, shareReplay } from 'rxjs';
 
 @Component({
   selector: 'app-text-diff',
@@ -45,9 +47,15 @@ import { EditorState } from '@codemirror/state';
 })
 export class TextDiffComponent {
   protected readonly document = inject(DOCUMENT);
+  protected readonly themeService = inject(ThemeService);
 
   protected readonly EditorState = EditorState;
-  protected readonly theme = material;
+  protected readonly theme = this.themeService.getTheme().pipe(shareReplay(1));
+
+  protected readonly editorTheme = this.theme.pipe(
+    map(theme => (theme === 'dark' ? materialDark : materialLight)),
+    shareReplay(1)
+  );
 
   diffForm = new FormGroup({
     originalText: new FormControl<string>('', { nonNullable: true }),

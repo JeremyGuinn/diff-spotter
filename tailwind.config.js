@@ -4,7 +4,16 @@ module.exports = {
   plugins: [require('daisyui')],
   darkMode: ['selector', '[data-theme="dark"]'],
   daisyui: {
-    themes: ['light', 'dark'],
+    themes: [
+      {
+        light: {
+          ...require('daisyui/src/theming/themes')['emerald'],
+        },
+        dark: {
+          ...require('daisyui/src/theming/themes')['dim'],
+        },
+      },
+    ],
   },
   theme: {
     extend: {},
