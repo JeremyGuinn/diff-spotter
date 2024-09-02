@@ -40,6 +40,7 @@ import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { MergeView, unifiedMergeView } from '@codemirror/merge';
 import { countAffectedLines } from '@lib/diffs';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 @Component({
   selector: 'app-text-diff',
@@ -51,6 +52,7 @@ import { countAffectedLines } from '@lib/diffs';
     NgIconComponent,
     CodeEditorComponent,
     DiffEditorComponent,
+    CopyButtonComponent,
   ],
   providers: [
     provideIcons({
