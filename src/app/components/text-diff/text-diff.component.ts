@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  computed,
   HostListener,
   inject,
   ViewChild,
@@ -27,8 +26,8 @@ import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { ThemeService } from '../../services/theme.service';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, map, shareReplay, startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { combineLatest, map, shareReplay, startWith, tap } from 'rxjs';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { unifiedMergeView } from '@codemirror/merge';
@@ -67,9 +66,11 @@ export class TextDiffComponent {
   protected readonly document = inject(DOCUMENT);
   protected readonly themeService = inject(ThemeService);
 
-  protected readonly theme = toSignal(this.themeService.getTheme());
-  protected readonly editorTheme = computed(() =>
-    this.theme() === 'dark' ? materialDark : materialLight
+  protected readonly editorTheme = this.themeService.getTheme().pipe(
+    map(theme => (theme === 'dark' ? materialDark : materialLight)),
+    // Theme changes may occur outside of Angular's zone, due to the menu option, so we need to trigger change detection manually
+    tap(() => setTimeout(() => this.changeDetector.detectChanges())),
+    shareReplay(1)
   );
 
   @ViewChild('diffEditor', { read: DiffEditorComponent })
@@ -98,13 +99,13 @@ export class TextDiffComponent {
     editable: this.diffSettings.controls.liveEdit.valueChanges.pipe(
       startWith(this.diffSettings.controls.liveEdit.value)
     ),
-    theme: this.themeService.getTheme(),
+    editorTheme: this.editorTheme,
   }).pipe(
-    map(({ editable, theme }) => [
+    map(({ editable, editorTheme }) => [
       EditorView.editable.of(editable),
       EditorState.readOnly.of(!editable),
       EditorView.lineWrapping,
-      theme === 'dark' ? materialDark : materialLight,
+      editorTheme,
     ]),
     shareReplay(1)
   );
@@ -236,7 +237,6 @@ export class TextDiffComponent {
   );
 
   getAdditions(text: string): number {
-    console.log(this.diffEditor);
     return (
       this.diffEditor?.mergeView?.chunks.reduce(
         (additions, chunk) =>
@@ -254,20 +254,6 @@ export class TextDiffComponent {
         0
       ) ?? 0
     );
-  }
-
-  async loadTestingData(): Promise<void> {
-    const path1 = 'assets/cipher-crack.js';
-    const path2 = 'assets/cipher.js';
-
-    const [originalText, modifiedText] = await Promise.all([
-      fetch(path1).then(response => response.text()),
-      fetch(path2).then(response => response.text()),
-    ]);
-
-    this.diffForm.patchValue({ originalText, modifiedText });
-    this.liveDiff.patchValue({ originalText, modifiedText });
-    this.changeDetector.detectChanges();
   }
 }
 

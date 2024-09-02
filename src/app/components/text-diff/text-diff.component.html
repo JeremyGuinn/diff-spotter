@@ -7,19 +7,6 @@
     <div>
       <div class="sticky top-0 w-80 p-4 text-base-content">
         <div class="flex items-center justify-between gap-2">
-          <label class="label" for="live-edit">Dark mode</label>
-          <input
-            type="checkbox"
-            class="toggle toggle-sm"
-            [checked]="theme() === 'dark'"
-            (change)="
-              themeService.setTheme(
-                $any($event.target).checked ? 'dark' : 'light'
-              )
-            " />
-        </div>
-
-        <div class="flex items-center justify-between gap-2">
           <label class="label" for="live-edit">Real-time diff</label>
           <input
             type="checkbox"
@@ -110,7 +97,7 @@
           [readonly]="true"
           [lineWrapping]="true"
           [extensions]="(unifiedDiffExtensions | async)!"
-          [theme]="theme() === 'dark' ? 'dark' : 'light'"
+          [theme]="(editorTheme | async)!"
           #unifiedDiffEditor></app-code-editor>
       } @else {
         <app-diff-editor
@@ -148,7 +135,7 @@
           </div>
           <app-code-editor
             [formControl]="diffForm.controls.originalText"
-            [theme]="theme() === 'dark' ? 'dark' : 'light'"
+            [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
             minHeight="300px">
           </app-code-editor>
@@ -166,7 +153,7 @@
           </div>
           <app-code-editor
             [formControl]="diffForm.controls.modifiedText"
-            [theme]="theme() === 'dark' ? 'dark' : 'light'"
+            [theme]="(editorTheme | async)!"
             [lineWrapping]="true"
             minHeight="300px">
           </app-code-editor>

@@ -72,7 +72,6 @@ export class CodeEditorComponent
     }
 
     if (changes['minHeight']) {
-      console.log(this.minHeight);
       (this.elementRef.nativeElement as HTMLElement).style.setProperty(
         '--code-editor-min-height',
         this.minHeight ?? 'auto'
