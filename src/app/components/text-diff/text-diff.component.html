@@ -1,173 +1,211 @@
-<div class="flex h-full">
+<div class="flex h-full flex-col">
   @if (
     liveDiff.controls.originalText.value ||
     liveDiff.controls.modifiedText.value ||
     diffSettings.controls.liveEdit.value
   ) {
-    <div>
-      <div class="sticky top-0 w-80 p-4 text-base-content">
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="live-edit">Real-time diff</label>
-          <input
-            type="checkbox"
-            class="toggle toggle-sm"
-            [formControl]="diffSettings.controls.liveEdit" />
+    <div class="flex flex-1">
+      <!-- Merge view settings -->
+      <div class="px-2 py-4">
+        <div
+          class="sticky top-0 flex w-48 flex-col gap-2 p-4 text-base-content">
+          <div class="flex items-center justify-between gap-2">
+            <label class="label p-0" for="liveEdit">Real-time diff</label>
+            <input
+              type="checkbox"
+              class="toggle toggle-sm"
+              id="liveEdit"
+              [formControl]="diffSettings.controls.liveEdit" />
+          </div>
+
+          <div class="flex items-center justify-between gap-2">
+            <label class="label p-0" for="unifiedDiff">Unified diff</label>
+            <input
+              type="checkbox"
+              class="toggle toggle-sm"
+              id="unifiedDiff"
+              [formControl]="diffSettings.controls.unifiedDiff" />
+          </div>
+
+          <div class="flex items-center justify-between gap-2">
+            <label class="label p-0" for="collapseLines">Collapse lines</label>
+            <input
+              type="checkbox"
+              class="toggle toggle-sm"
+              id="collapseLines"
+              [formControl]="diffSettings.controls.collapseLines" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Merge view -->
+      <div class="w-full space-y-4 px-2 py-4">
+        <div class="sticky top-0 z-10 flex justify-between bg-base-100 py-2">
+          <div>
+            <h2 class="text-2xl font-semibold">Untitled diff</h2>
+          </div>
+          <div class="flex items-center justify-end gap-2">
+            <button class="btn btn-ghost btn-sm" (click)="clear()">
+              Clear
+            </button>
+            <button class="btn btn-neutral btn-sm">
+              <ng-icon name="remixSaveLine"></ng-icon>
+              Save
+            </button>
+            <button class="btn btn-primary btn-sm">
+              <ng-icon name="remixShareForwardBoxLine"></ng-icon>
+              Share
+            </button>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="live-edit">Unified diff</label>
-          <input
-            type="checkbox"
-            class="toggle toggle-sm"
-            [formControl]="diffSettings.controls.unifiedDiff" />
+        <div
+          *ngIf="diffStats | async as stats"
+          class="border-b-grap-200 flex justify-between gap-3 border-b-2 p-2 dark:border-b-gray-600">
+          <div class="flex flex-1 items-center justify-between">
+            <div class="flex items-center gap-1 font-semibold text-red-700">
+              <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
+              <span>
+                {{ stats.removals | i18nPlural: pluralMapping('removal') }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-400">
+                {{
+                  stats.totalOriginalLines | i18nPlural: pluralMapping('line')
+                }}
+              </span>
+              <app-copy-button [text]="liveDiff.controls.originalText.value">
+              </app-copy-button>
+            </div>
+          </div>
+          <div>
+            <button
+              class="btn btn-square btn-ghost btn-sm"
+              (click)="swapTexts()">
+              <ng-icon name="remixArrowLeftRightFill"></ng-icon>
+            </button>
+          </div>
+          <div class="flex flex-1 items-center justify-between">
+            <div class="flex items-center gap-1 font-semibold text-green-700">
+              <ng-icon name="remixAddCircleFill"></ng-icon>
+              <span>
+                {{ stats.additions | i18nPlural: pluralMapping('addition') }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-gray-400">
+                {{
+                  stats.totalModifiedLines | i18nPlural: pluralMapping('line')
+                }}
+              </span>
+              <app-copy-button
+                [text]="liveDiff.controls.modifiedText.value"></app-copy-button>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between gap-2">
-          <label class="label" for="live-edit">Collapse lines</label>
-          <input
-            type="checkbox"
-            class="toggle toggle-sm"
-            [formControl]="diffSettings.controls.collapseLines" />
-        </div>
+        <app-diff-editor
+          *ngIf="!diffSettings.controls.unifiedDiff.value"
+          minHeight="600px"
+          [originalExtensions]="(diffExtensions | async)!"
+          [modifiedExtensions]="(diffExtensions | async)!"
+          [collapseUnchanged]="
+            diffSettings.controls.collapseLines.value
+              ? { margin: 3, minSize: 4 }
+              : undefined
+          "
+          [originalValue]="liveDiff.controls.originalText.value"
+          [modifiedValue]="liveDiff.controls.modifiedText.value"
+          (modifiedValueChange)="
+            diffForm.controls.modifiedText.setValue($event)
+          "
+          (originalValueChange)="
+            diffForm.controls.originalText.setValue($event)
+          "
+          (viewReady)="diffMergeView.next($event)"></app-diff-editor>
+
+        <app-code-editor
+          *ngIf="diffSettings.controls.unifiedDiff.value"
+          minHeight="600px"
+          [value]="liveDiff.controls.modifiedText.value"
+          [disabled]="diffSettings.controls.liveEdit.value"
+          [readonly]="!diffSettings.controls.liveEdit.value"
+          [lineWrapping]="true"
+          [extensions]="(unifiedDiffExtensions | async)!"
+          [theme]="(editorTheme | async)!"></app-code-editor>
       </div>
     </div>
   }
-  <div class="w-full space-y-4 p-6 shadow-md">
-    <div class="sticky top-0 z-10 flex justify-between bg-base-100 py-2">
-      <div>
-        <h2 class="text-2xl font-semibold">Untitled diff</h2>
+
+  @if (!diffSettings.controls.liveEdit.value) {
+    <div class="flex flex-1">
+      <!-- Saved Diffs -->
+      <div class="px-2 py-4">
+        <div class="sticky top-0 flex w-48 flex-col gap-2 text-base-content">
+          <div class="border-b-2">
+            <span class="flex items-center gap-2 py-2 font-semibold">
+              <ng-icon name="remixSaveLine"></ng-icon>
+              Saved Diffs
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-content text-sm"
+              >Your saved diffs will appear here.</span
+            >
+          </div>
+        </div>
       </div>
-      <div class="flex items-center justify-end gap-2">
-        <button class="btn btn-ghost btn-sm" (click)="clear()">Clear</button>
-        <button class="btn btn-neutral btn-sm">
-          <ng-icon name="remixSaveLine"></ng-icon>
-          Save
-        </button>
-        <button class="btn btn-primary btn-sm">
-          <ng-icon name="remixShareForwardBoxLine"></ng-icon>
-          Share
+
+      <!-- Diff document entry -->
+      <div class="w-full flex-1 space-y-4 px-2 py-4">
+        <div class="flex flex-wrap gap-3">
+          <div class="min-w-96 flex-1">
+            <div class="flex content-center items-center justify-between">
+              <label class="label" for="originalText">Original Text</label>
+              <button
+                class="btn btn-ghost btn-primary btn-sm"
+                (click)="openFile(diffForm.controls.originalText)">
+                <ng-icon name="remixFileAddLine"></ng-icon>
+                Open file
+              </button>
+            </div>
+            <app-code-editor
+              [formControl]="diffForm.controls.originalText"
+              [theme]="(editorTheme | async)!"
+              [lineWrapping]="true"
+              data-control="originalText"
+              minHeight="300px"
+              [style.height.px]="300">
+            </app-code-editor>
+          </div>
+
+          <div class="min-w-96 flex-1">
+            <div class="flex content-center items-center justify-between">
+              <label class="label" for="modifiedText">Modified Text</label>
+              <button
+                class="btn btn-ghost btn-primary btn-sm"
+                (click)="openFile(diffForm.controls.modifiedText)">
+                <ng-icon name="remixFileAddLine"></ng-icon>
+                Open file
+              </button>
+            </div>
+            <app-code-editor
+              [formControl]="diffForm.controls.modifiedText"
+              [theme]="(editorTheme | async)!"
+              [lineWrapping]="true"
+              data-control="modifiedText"
+              minHeight="300px"
+              [style.height.px]="300">
+            </app-code-editor>
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-full" (click)="findDiff()">
+          Find Differences
         </button>
       </div>
     </div>
-
-    @if (
-      liveDiff.controls.originalText.value ||
-      liveDiff.controls.modifiedText.value ||
-      diffSettings.controls.liveEdit.value
-    ) {
-      <div
-        *ngIf="diffStats | async as stats"
-        class="border-b-grap-200 flex justify-between gap-3 border-b-2 p-2 dark:border-b-gray-600">
-        <div class="flex flex-1 items-center justify-between">
-          <div class="flex items-center gap-1 font-semibold text-red-700">
-            <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
-            <span>
-              {{ stats.removals | i18nPlural: pluralMapping('removal') }}
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-gray-400">
-              {{ stats.totalOriginalLines | i18nPlural: pluralMapping('line') }}
-            </span>
-            <app-copy-button [text]="liveDiff.controls.originalText.value">
-            </app-copy-button>
-          </div>
-        </div>
-        <div>
-          <button class="btn btn-square btn-ghost btn-sm" (click)="swapTexts()">
-            <ng-icon name="remixArrowLeftRightFill"></ng-icon>
-          </button>
-        </div>
-        <div class="flex flex-1 items-center justify-between">
-          <div class="flex items-center gap-1 font-semibold text-green-700">
-            <ng-icon name="remixAddCircleFill"></ng-icon>
-            <span>
-              {{ stats.additions | i18nPlural: pluralMapping('addition') }}
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-gray-400">
-              {{ stats.totalModifiedLines | i18nPlural: pluralMapping('line') }}
-            </span>
-            <app-copy-button
-              [text]="liveDiff.controls.modifiedText.value"></app-copy-button>
-          </div>
-        </div>
-      </div>
-
-      <app-diff-editor
-        *ngIf="!diffSettings.controls.unifiedDiff.value"
-        minHeight="600px"
-        [originalExtensions]="(diffExtensions | async)!"
-        [modifiedExtensions]="(diffExtensions | async)!"
-        [collapseUnchanged]="
-          diffSettings.controls.collapseLines.value
-            ? { margin: 3, minSize: 4 }
-            : undefined
-        "
-        [originalValue]="liveDiff.controls.originalText.value"
-        [modifiedValue]="liveDiff.controls.modifiedText.value"
-        (modifiedValueChange)="diffForm.controls.modifiedText.setValue($event)"
-        (originalValueChange)="diffForm.controls.originalText.setValue($event)"
-        (viewReady)="diffMergeView.next($event)"></app-diff-editor>
-
-      <app-code-editor
-        *ngIf="diffSettings.controls.unifiedDiff.value"
-        minHeight="600px"
-        [value]="liveDiff.controls.modifiedText.value"
-        [disabled]="true"
-        [readonly]="true"
-        [lineWrapping]="true"
-        [extensions]="(unifiedDiffExtensions | async)!"
-        [theme]="(editorTheme | async)!"></app-code-editor>
-    }
-
-    @if (!diffSettings.controls.liveEdit.value) {
-      <div class="flex flex-wrap gap-3">
-        <div class="min-w-96 flex-1">
-          <div class="flex content-center items-center justify-between">
-            <label class="label" for="originalText">Original Text</label>
-            <button
-              class="btn btn-ghost btn-primary btn-sm"
-              (click)="openFile(diffForm.controls.originalText)">
-              <ng-icon name="remixFileAddLine"></ng-icon>
-              Open file
-            </button>
-          </div>
-          <app-code-editor
-            [formControl]="diffForm.controls.originalText"
-            [theme]="(editorTheme | async)!"
-            [lineWrapping]="true"
-            data-control="originalText"
-            minHeight="300px"
-            [style.height.px]="300">
-          </app-code-editor>
-        </div>
-
-        <div class="min-w-96 flex-1">
-          <div class="flex content-center items-center justify-between">
-            <label class="label" for="modifiedText">Modified Text</label>
-            <button
-              class="btn btn-ghost btn-primary btn-sm"
-              (click)="openFile(diffForm.controls.modifiedText)">
-              <ng-icon name="remixFileAddLine"></ng-icon>
-              Open file
-            </button>
-          </div>
-          <app-code-editor
-            [formControl]="diffForm.controls.modifiedText"
-            [theme]="(editorTheme | async)!"
-            [lineWrapping]="true"
-            data-control="modifiedText"
-            minHeight="300px"
-            [style.height.px]="300">
-          </app-code-editor>
-        </div>
-      </div>
-
-      <button class="btn btn-primary w-full" (click)="findDiff()">
-        Find Differences
-      </button>
-    }
-  </div>
+  }
 </div>
