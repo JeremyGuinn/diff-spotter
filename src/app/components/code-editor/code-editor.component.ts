@@ -8,7 +8,6 @@ import {
   SimpleChanges,
   forwardRef,
   OnInit,
-  HostBinding,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -54,7 +53,6 @@ export class CodeEditorComponent
   extends CodeEditor
   implements OnChanges, OnInit
 {
-  @HostBinding('class') hostClass = 'code-editor';
   @Input() minHeight?: string;
 
   constructor(private elementRef: ElementRef) {
@@ -76,6 +74,14 @@ export class CodeEditorComponent
         '--code-editor-min-height',
         this.minHeight ?? 'auto'
       );
+    }
+
+    if (changes['disabled']) {
+      this.setEditable(this.disabled);
+    }
+
+    if (changes['readonly']) {
+      this.setReadonly(this.readonly);
     }
 
     super.ngOnChanges(changes);
