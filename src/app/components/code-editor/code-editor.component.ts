@@ -30,6 +30,7 @@ export const External = Annotation.define<boolean>();
 
     .code-editor {
       display: block;
+      @apply overflow-hidden rounded-lg focus-within:outline-none focus-within:ring focus-within:ring-primary;
 
       .cm-editor {
         height: 100%;

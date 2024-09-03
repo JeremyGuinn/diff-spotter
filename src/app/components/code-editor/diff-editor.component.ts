@@ -26,6 +26,7 @@ import { MergeView } from '@codemirror/merge';
 
     .diff-editor {
       display: block;
+      @apply overflow-hidden rounded-lg;
 
       .cm-mergeView,
       .cm-mergeViewEditors {

@@ -172,6 +172,7 @@
               </button>
             </div>
             <app-code-editor
+              [autoFocus]="true"
               [formControl]="diffForm.controls.originalText"
               [theme]="(editorTheme | async)!"
               [lineWrapping]="true"
