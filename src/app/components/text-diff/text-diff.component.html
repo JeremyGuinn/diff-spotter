@@ -6,45 +6,161 @@
   ) {
     <div class="flex flex-1">
       <!-- Merge view settings -->
-      <div class="px-2 py-4">
-        <div
-          class="sticky top-0 flex w-48 flex-col gap-2 p-4 text-base-content">
-          <div class="flex items-center justify-between gap-2">
-            <label class="label p-0" for="liveEdit">Real-time diff</label>
-            <input
-              type="checkbox"
-              class="toggle toggle-sm"
-              id="liveEdit"
-              [formControl]="diffSettings.controls.liveEdit" />
+      <div class="px-2 py-4 text-sm print:hidden">
+        <div class="sticky top-0 flex w-48 flex-col gap-y-4 text-base-content">
+          <div class="border-b border-b-gray-200 pt-2 dark:border-b-gray-600">
+            <span class="flex items-center gap-2 py-2 font-semibold">
+              <button
+                class="btn btn-square btn-ghost btn-sm"
+                [class.btn-active]="activeTab() === 'settings'"
+                (click)="activeTab.set('settings')">
+                <ng-icon name="remixSoundModuleLine"></ng-icon>
+              </button>
+              <button
+                class="btn btn-square btn-ghost btn-sm"
+                [class.btn-active]="activeTab() === 'history'"
+                (click)="activeTab.set('history')">
+                <ng-icon name="remixHistoryLine"></ng-icon>
+              </button>
+            </span>
           </div>
 
-          <div class="flex items-center justify-between gap-2">
-            <label class="label p-0" for="unifiedDiff">Unified diff</label>
-            <input
-              type="checkbox"
-              class="toggle toggle-sm"
-              id="unifiedDiff"
-              [formControl]="diffSettings.controls.unifiedDiff" />
-          </div>
+          @if (activeTab() === 'settings') {
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <label class="label p-0" for="liveEdit">Real-time diff</label>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                  id="liveEdit"
+                  [formControl]="diffSettings.controls.liveEdit" />
+              </div>
 
-          <div class="flex items-center justify-between gap-2">
-            <label class="label p-0" for="collapseLines">Collapse lines</label>
-            <input
-              type="checkbox"
-              class="toggle toggle-sm"
-              id="collapseLines"
-              [formControl]="diffSettings.controls.collapseLines" />
-          </div>
+              <div class="flex items-center justify-between gap-2">
+                <label class="label p-0" for="unifiedDiff">Unified diff</label>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                  id="unifiedDiff"
+                  [formControl]="diffSettings.controls.unifiedDiff" />
+              </div>
+
+              <div class="flex items-center justify-between gap-2">
+                <label class="label p-0" for="collapseLines"
+                  >Collapse lines</label
+                >
+                <input
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                  id="collapseLines"
+                  [formControl]="diffSettings.controls.collapseLines" />
+              </div>
+            </div>
+
+            <div class="">
+              <span class="text-xs uppercase">Highlight change</span>
+              <div
+                class="flex items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                <button
+                  class="btn btn-ghost btn-sm flex-1"
+                  [class.btn-active]="
+                    diffSettings.controls.highlightMode.value === 'line'
+                  "
+                  (click)="
+                    diffSettings.controls.highlightMode.setValue('line')
+                  ">
+                  Line
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm flex-1"
+                  [class.btn-active]="
+                    diffSettings.controls.highlightMode.value === 'character'
+                  "
+                  (click)="
+                    diffSettings.controls.highlightMode.setValue('character')
+                  ">
+                  Character
+                </button>
+              </div>
+            </div>
+
+            <div class="">
+              <span class="text-xs uppercase">Syntax highlighting</span>
+              <div
+                class="flex items-center justify-between gap-0.5 rounded-md p-0.5">
+                <select class="select select-bordered select-sm w-full">
+                  <option disabled selected hidden>Choose syntax</option>
+                  <option value="">None</option>
+                  @for (language of languages; track language.name) {
+                    <option [value]="language">{{ language.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="">
+              <span class="text-xs uppercase">Tools</span>
+              <div
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                <button
+                  class="btn btn-ghost btn-sm inline-block w-full text-left"
+                  (click)="toLowerCase()">
+                  To lowercase
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm inline-block w-full text-left"
+                  (click)="sortLines()">
+                  Sort lines
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm inline-block h-1 w-full text-left"
+                  (click)="replaceLineBreaks()">
+                  Replace line breaks with spaces
+                </button>
+                <button
+                  class="btn btn-ghost btn-sm inline-block w-full text-left"
+                  (click)="trimWhitespace()">
+                  Trim whitespace
+                </button>
+              </div>
+            </div>
+
+            <div class="">
+              <div
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                <button
+                  class="item-center btn btn-ghost btn-sm w-full justify-start text-left"
+                  [disabled]="diffSettings.controls.liveEdit.value"
+                  (click)="print()">
+                  <ng-icon name="remixUploadLine"></ng-icon>
+                  Export as PDF
+                </button>
+              </div>
+            </div>
+
+            <div class="">
+              <div
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                <button
+                  class="item-center btn btn-ghost btn-sm w-full justify-start text-left"
+                  [disabled]="diffSettings.controls.liveEdit.value"
+                  (click)="editorSection.scrollIntoView()">
+                  <ng-icon name="remixArrowDownLine"></ng-icon>
+                  Skip to editor
+                </button>
+              </div>
+            </div>
+          }
         </div>
       </div>
 
       <!-- Merge view -->
-      <div class="w-full space-y-4 px-2 py-4">
+      <div class="w-full px-2 py-4">
         <div class="sticky top-0 z-10 flex justify-between bg-base-100 py-2">
           <div>
             <h2 class="text-2xl font-semibold">Untitled diff</h2>
           </div>
-          <div class="flex items-center justify-end gap-2">
+          <div class="flex items-center justify-end gap-2 print:hidden">
             <button class="btn btn-ghost btn-sm" (click)="clear()">
               Clear
             </button>
@@ -61,45 +177,50 @@
 
         <div
           *ngIf="diffStats | async as stats"
-          class="border-b-grap-200 flex justify-between gap-3 border-b-2 p-2 dark:border-b-gray-600">
+          class="mb-1 flex justify-between gap-3 border-b border-b-gray-200 px-2 dark:border-b-gray-600">
           <div class="flex flex-1 items-center justify-between">
-            <div class="flex items-center gap-1 font-semibold text-red-700">
+            <div
+              class="flex items-center gap-1 font-semibold text-red-700 dark:text-red-600">
               <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
               <span>
                 {{ stats.removals | i18nPlural: pluralMapping('removal') }}
               </span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-gray-400">
+              <span class="text-sm text-gray-400">
                 {{
                   stats.totalOriginalLines | i18nPlural: pluralMapping('line')
                 }}
               </span>
-              <app-copy-button [text]="liveDiff.controls.originalText.value">
+              <app-copy-button
+                class="print:hidden"
+                [text]="liveDiff.controls.originalText.value">
               </app-copy-button>
             </div>
           </div>
-          <div>
+          <div class="">
             <button
-              class="btn btn-square btn-ghost btn-sm"
+              class="btn btn-square btn-ghost btn-sm print:hidden"
               (click)="swapTexts()">
               <ng-icon name="remixArrowLeftRightFill"></ng-icon>
             </button>
           </div>
           <div class="flex flex-1 items-center justify-between">
-            <div class="flex items-center gap-1 font-semibold text-green-700">
+            <div
+              class="flex items-center gap-1 font-semibold text-green-700 dark:text-green-600">
               <ng-icon name="remixAddCircleFill"></ng-icon>
               <span>
                 {{ stats.additions | i18nPlural: pluralMapping('addition') }}
               </span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-gray-400">
+              <span class="text-sm text-gray-400">
                 {{
                   stats.totalModifiedLines | i18nPlural: pluralMapping('line')
                 }}
               </span>
               <app-copy-button
+                class="print:hidden"
                 [text]="liveDiff.controls.modifiedText.value"></app-copy-button>
             </div>
           </div>
@@ -114,6 +235,12 @@
             diffSettings.controls.collapseLines.value
               ? { margin: 3, minSize: 4 }
               : undefined
+          "
+          [revertControls]="
+            !diffSettings.controls.liveEdit.value ? 'a-to-b' : undefined
+          "
+          [highlightChanges]="
+            diffSettings.controls.highlightMode.value === 'character'
           "
           [originalValue]="liveDiff.controls.originalText.value"
           [modifiedValue]="liveDiff.controls.modifiedText.value"
@@ -137,13 +264,12 @@
       </div>
     </div>
   }
-
-  @if (!diffSettings.controls.liveEdit.value) {
-    <div class="flex flex-1">
+  <div class="flex flex-1 print:hidden" #editorSection>
+    @if (!diffSettings.controls.liveEdit.value) {
       <!-- Saved Diffs -->
       <div class="px-2 py-4">
         <div class="sticky top-0 flex w-48 flex-col gap-2 text-base-content">
-          <div class="border-b-2">
+          <div class="border-b border-b-gray-200 dark:border-b-gray-600">
             <span class="flex items-center gap-2 py-2 font-semibold">
               <ng-icon name="remixSaveLine"></ng-icon>
               Saved Diffs
@@ -172,6 +298,7 @@
               </button>
             </div>
             <app-code-editor
+              #originalTextEditor
               [autoFocus]="true"
               [formControl]="diffForm.controls.originalText"
               [theme]="(editorTheme | async)!"
@@ -207,6 +334,6 @@
           Find Differences
         </button>
       </div>
-    </div>
-  }
+    }
+  </div>
 </div>

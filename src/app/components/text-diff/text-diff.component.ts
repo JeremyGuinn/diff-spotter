@@ -5,6 +5,7 @@ import {
   Component,
   HostListener,
   inject,
+  signal,
 } from '@angular/core';
 import {
   FormControl,
@@ -20,6 +21,10 @@ import {
   remixAddCircleFill,
   remixIndeterminateCircleFill,
   remixArrowLeftRightFill,
+  remixSoundModuleLine,
+  remixHistoryLine,
+  remixArrowDownLine,
+  remixUploadLine,
 } from '@ng-icons/remixicon';
 import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
 import { Compartment, EditorState } from '@codemirror/state';
@@ -43,8 +48,10 @@ import { calculateLinesRemovedAndAdded } from '@lib/diffs';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 import { language } from '@codemirror/language';
+import { languages } from '@codemirror/language-data';
 import { javascript } from '@codemirror/lang-javascript';
 import { htmlLanguage, html } from '@codemirror/lang-html';
+import { cleanMultilineString } from '@lib/strings';
 
 @Component({
   selector: 'app-text-diff',
@@ -66,6 +73,10 @@ import { htmlLanguage, html } from '@codemirror/lang-html';
       remixAddCircleFill,
       remixIndeterminateCircleFill,
       remixArrowLeftRightFill,
+      remixSoundModuleLine,
+      remixHistoryLine,
+      remixArrowDownLine,
+      remixUploadLine,
     }),
   ],
   templateUrl: './text-diff.component.html',
@@ -76,10 +87,25 @@ export class TextDiffComponent {
   protected readonly EditorState = EditorState;
   protected readonly EditorView = EditorView;
   protected readonly unifiedMergeView = unifiedMergeView;
+  protected readonly languages = languages;
 
   protected readonly changeDetector = inject(ChangeDetectorRef);
   protected readonly document = inject(DOCUMENT);
   protected readonly themeService = inject(ThemeService);
+
+  diffMergeView = new ReplaySubject<MergeView>(1);
+  activeTab = signal<'history' | 'settings'>('settings');
+  languageConf = new Compartment();
+
+  autoLanguage = EditorState.transactionExtender.of(tr => {
+    if (!tr.docChanged) return null;
+    const docIsHTML = /^\s*</.test(tr.newDoc.sliceString(0, 100));
+    const stateIsHTML = tr.startState.facet(language) == htmlLanguage;
+    if (docIsHTML == stateIsHTML) return null;
+    return {
+      effects: this.languageConf.reconfigure(docIsHTML ? html() : javascript()),
+    };
+  });
 
   editorTheme = this.themeService.getTheme().pipe(
     map(theme => (theme === 'dark' ? materialDark : materialLight)),
@@ -93,6 +119,9 @@ export class TextDiffComponent {
     unifiedDiff: new FormControl<boolean>(false, { nonNullable: true }),
     collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
     language: new FormControl<string>('text', { nonNullable: true }),
+    highlightMode: new FormControl<'line' | 'character'>('character', {
+      nonNullable: true,
+    }),
   });
 
   diffForm = new FormGroup({
@@ -100,23 +129,11 @@ export class TextDiffComponent {
     modifiedText: new FormControl<string>('', { nonNullable: true }),
   });
 
+  /* This form is used to render the diff output, and is intentionally separate
+     to prevent the editor cursor from jumping on every change */
   liveDiff = new FormGroup({
     originalText: new FormControl<string>('', { nonNullable: true }),
     modifiedText: new FormControl<string>('', { nonNullable: true }),
-  });
-
-  diffMergeView = new ReplaySubject<MergeView>(1);
-
-  languageConf = new Compartment();
-
-  autoLanguage = EditorState.transactionExtender.of(tr => {
-    if (!tr.docChanged) return null;
-    const docIsHTML = /^\s*</.test(tr.newDoc.sliceString(0, 100));
-    const stateIsHTML = tr.startState.facet(language) == htmlLanguage;
-    if (docIsHTML == stateIsHTML) return null;
-    return {
-      effects: this.languageConf.reconfigure(docIsHTML ? html() : javascript()),
-    };
   });
 
   diffExtensions = combineLatest({
@@ -201,12 +218,7 @@ export class TextDiffComponent {
         takeUntilDestroyed(),
         filter(liveEdit => !!liveEdit)
       )
-      .subscribe(() => {
-        this.liveDiff.patchValue({
-          originalText: this.diffForm.controls.originalText.value,
-          modifiedText: this.diffForm.controls.modifiedText.value,
-        });
-      });
+      .subscribe(() => this.syncDocsWithDiff());
   }
 
   @HostListener('dragover', ['$event'])
@@ -250,27 +262,79 @@ export class TextDiffComponent {
   }
 
   findDiff() {
+    this.syncDocsWithDiff();
+  }
+
+  swapTexts() {
+    this.diffForm.patchValue({
+      originalText: this.diffForm.controls.modifiedText.value,
+      modifiedText: this.diffForm.controls.originalText.value,
+    });
+    this.syncDocsWithDiff();
+  }
+
+  clear(): void {
+    this.diffSettings.patchValue({ liveEdit: false }, { emitEvent: false });
+    this.diffForm.patchValue({ originalText: '', modifiedText: '' });
+    this.syncDocsWithDiff();
+  }
+
+  print(): void {
+    window.print();
+  }
+
+  syncDocsWithDiff() {
     this.liveDiff.patchValue({
       originalText: this.diffForm.controls.originalText.value,
       modifiedText: this.diffForm.controls.modifiedText.value,
     });
   }
 
-  swapTexts() {
-    this.liveDiff.patchValue({
-      originalText: this.diffForm.controls.modifiedText.value,
-      modifiedText: this.diffForm.controls.originalText.value,
-    });
+  sortLines() {
+    const originalText = this.diffForm.controls.originalText.value;
+    const modifiedText = this.diffForm.controls.modifiedText.value;
+
     this.diffForm.patchValue({
-      originalText: this.diffForm.controls.modifiedText.value,
-      modifiedText: this.diffForm.controls.originalText.value,
+      originalText: originalText.split('\n').sort().join('\n'),
+      modifiedText: modifiedText.split('\n').sort().join('\n'),
     });
+    this.syncDocsWithDiff();
   }
 
-  clear(): void {
-    this.diffSettings.patchValue({ liveEdit: false }, { emitEvent: false });
-    this.diffForm.patchValue({ originalText: '', modifiedText: '' });
-    this.liveDiff.patchValue({ originalText: '', modifiedText: '' });
+  toLowerCase() {
+    const originalText = this.diffForm.controls.originalText.value;
+    const modifiedText = this.diffForm.controls.modifiedText.value;
+
+    this.diffForm.patchValue({
+      originalText: originalText.toLowerCase(),
+      modifiedText: modifiedText.toLowerCase(),
+    });
+    this.syncDocsWithDiff();
+  }
+
+  replaceLineBreaks() {
+    const originalText = this.diffForm.controls.originalText.value;
+    const modifiedText = this.diffForm.controls.modifiedText.value;
+
+    this.diffForm.patchValue({
+      originalText: originalText.replace(/\n/g, ' '),
+      modifiedText: modifiedText.replace(/\n/g, ' '),
+    });
+    this.syncDocsWithDiff();
+  }
+
+  trimWhitespace() {
+    const originalText = this.diffForm.controls.originalText.value;
+    const modifiedText = this.diffForm.controls.modifiedText.value;
+
+    // remove duplicate line breaks, but keep single line breaks
+    // remove duplicate spaces, but keep single spaces, unless it's at the beginning or end of a line
+
+    this.diffForm.patchValue({
+      originalText: cleanMultilineString(originalText),
+      modifiedText: cleanMultilineString(modifiedText),
+    });
+    this.syncDocsWithDiff();
   }
 
   private loadFileText(file: File, control: FormControl): void {

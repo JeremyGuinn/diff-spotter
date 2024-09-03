@@ -8,4 +8,22 @@
       border: theme('borderWidth.2') solid theme('colors.primary');
     }
   }
+
+  .cm-mergeViewEditor + .cm-mergeViewEditor .cm-scroller {
+    margin-left: theme('spacing.7');
+  }
+
+  .cm-mergeViewEditor:first-of-type .cm-scroller {
+    margin-right: theme('spacing.7');
+  }
+
+  @media print {
+    .cm-mergeViewEditor + .cm-mergeViewEditor .cm-scroller {
+      margin-left: 0;
+    }
+
+    .cm-mergeViewEditor:first-of-type .cm-scroller {
+      margin-right: 0;
+    }
+  }
 }
