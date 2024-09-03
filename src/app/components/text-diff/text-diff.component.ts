@@ -39,7 +39,7 @@ import {
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { MergeView, unifiedMergeView } from '@codemirror/merge';
-import { countAffectedLines } from '@lib/diffs';
+import { calculateLinesRemovedAndAdded } from '@lib/diffs';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 @Component({
@@ -151,27 +151,24 @@ export class TextDiffComponent {
   }).pipe(
     delay(0),
     map(({ view }) => {
-      const removals = countAffectedLines(
-        this.diffForm.controls.originalText.value,
-        view?.chunks ?? [],
-        'A',
-        { lineEnding: '\n' }
-      );
+      const originalText = this.diffForm.controls.originalText.value;
+      const totalOriginalLines = originalText.split('\n').length;
 
-      const additions = countAffectedLines(
-        this.diffForm.controls.modifiedText.value,
-        view?.chunks ?? [],
-        'B',
-        { lineEnding: '\n' }
-      );
+      const modifiedText = this.diffForm.controls.modifiedText.value;
+      const totalModifiedLines = modifiedText.split('\n').length;
+
+      const { removals: chunkLinesRemoved, additions: chunkLinesAdded } =
+        calculateLinesRemovedAndAdded(
+          view?.chunks ?? [],
+          originalText,
+          modifiedText
+        );
 
       return {
-        removals: removals,
-        totalOriginalLines:
-          this.diffForm.controls.originalText.value.split('\n').length,
-        additions: additions,
-        totalModifiedLines:
-          this.diffForm.controls.modifiedText.value.split('\n').length,
+        removals: chunkLinesRemoved,
+        additions: chunkLinesAdded,
+        totalOriginalLines: totalOriginalLines,
+        totalModifiedLines: totalModifiedLines,
       };
     })
   );
