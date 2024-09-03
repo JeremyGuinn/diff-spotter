@@ -22,7 +22,7 @@ import {
   remixArrowLeftRightFill,
 } from '@ng-icons/remixicon';
 import { materialDark, materialLight } from '@uiw/codemirror-theme-material';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { ThemeService } from '../../services/theme.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -41,6 +41,10 @@ import { DiffEditorComponent } from '../code-editor/diff-editor.component';
 import { MergeView, unifiedMergeView } from '@codemirror/merge';
 import { calculateLinesRemovedAndAdded } from '@lib/diffs';
 import { CopyButtonComponent } from '../copy-button/copy-button.component';
+
+import { language } from '@codemirror/language';
+import { javascript } from '@codemirror/lang-javascript';
+import { htmlLanguage, html } from '@codemirror/lang-html';
 
 @Component({
   selector: 'app-text-diff',
@@ -88,6 +92,7 @@ export class TextDiffComponent {
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
     unifiedDiff: new FormControl<boolean>(false, { nonNullable: true }),
     collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
+    language: new FormControl<string>('text', { nonNullable: true }),
   });
 
   diffForm = new FormGroup({
@@ -102,6 +107,18 @@ export class TextDiffComponent {
 
   diffMergeView = new ReplaySubject<MergeView>(1);
 
+  languageConf = new Compartment();
+
+  autoLanguage = EditorState.transactionExtender.of(tr => {
+    if (!tr.docChanged) return null;
+    const docIsHTML = /^\s*</.test(tr.newDoc.sliceString(0, 100));
+    const stateIsHTML = tr.startState.facet(language) == htmlLanguage;
+    if (docIsHTML == stateIsHTML) return null;
+    return {
+      effects: this.languageConf.reconfigure(docIsHTML ? html() : javascript()),
+    };
+  });
+
   diffExtensions = combineLatest({
     editable: this.diffSettings.controls.liveEdit.valueChanges.pipe(
       startWith(this.diffSettings.controls.liveEdit.value)
@@ -113,6 +130,8 @@ export class TextDiffComponent {
       EditorState.readOnly.of(!editable),
       EditorView.lineWrapping,
       editorTheme,
+      this.languageConf.of(javascript()),
+      this.autoLanguage,
     ]),
     shareReplay(1)
   );
@@ -126,6 +145,9 @@ export class TextDiffComponent {
     ),
   }).pipe(
     map(({ collapseLines }) => [
+      this.languageConf.of(javascript()),
+      this.autoLanguage,
+      EditorView.lineWrapping,
       unifiedMergeView({
         original: this.diffForm.controls.originalText.value,
         mergeControls: false,
