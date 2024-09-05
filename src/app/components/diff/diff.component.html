@@ -1,0 +1,13 @@
+<div *ngIf="diff$ | async as diff" class="h-full">
+  @switch (diff.method) {
+    @case ('TEXT') {
+      <app-text-diff></app-text-diff>
+    }
+    @case ('IMAGE') {}
+    @default {
+      <app-new-diff
+        class="h-full"
+        (methodSelect)="newDiff($event)"></app-new-diff>
+    }
+  }
+</div>

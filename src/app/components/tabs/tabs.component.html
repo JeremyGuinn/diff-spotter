@@ -1,0 +1,18 @@
+<div role="tablist" class="tabs-boxed tabs flex gap-2 p-2">
+  @for (tab of tabs | async; track tab.diffId) {
+    <app-tab
+      [title]="tab.title"
+      [link]="['tabs', tab.diffId]"
+      [icon]="tab.icon"
+      (tabClose)="closeDiff(tab.diffId, $event)"></app-tab>
+  }
+
+  <a
+    role="button"
+    class="tab btn btn-square btn-ghost btn-sm"
+    tabindex="-1"
+    (click)="newDiff()"
+    (keydown.enter)="newDiff()">
+    <ng-icon name="remixAddLine"></ng-icon>
+  </a>
+</div>
