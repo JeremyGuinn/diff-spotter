@@ -2,14 +2,18 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  HostListener,
   inject,
   Input,
 } from '@angular/core';
 import { DiffMethod, DiffsService } from '@app/services/diffs.service';
-import { BehaviorSubject, combineLatest, filter, map, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, take, tap } from 'rxjs';
 import { NewDiffComponent } from '../new-diff/new-diff.component';
 import { TextDiffComponent } from '../text-diff/text-diff.component';
 import { Router } from '@angular/router';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+
+const appWindow = getCurrentWindow();
 
 @Component({
   selector: 'app-diff',
@@ -23,11 +27,18 @@ export class DiffComponent {
   private readonly router = inject(Router);
   private readonly diffsService = inject(DiffsService);
 
+  private readonly id$ = new BehaviorSubject<string>('');
+
   @Input() set id(value: string) {
     this.id$.next(value);
   }
 
-  private id$ = new BehaviorSubject<string>('');
+  @HostListener('window:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'w' && event.ctrlKey) {
+      this.closeDiff(this.id$.value);
+    }
+  }
 
   diff$ = combineLatest({
     id: this.id$,
@@ -50,6 +61,23 @@ export class DiffComponent {
     this.diffsService.removeDiff(this.id$.value);
     this.diffsService.addDiff(newDiff);
     this.router.navigate(['/tabs', newDiff.diffId]);
+  }
+
+  closeDiff(diffId: string) {
+    this.diffsService
+      .getOpenDiffs()
+      .pipe(take(1))
+      .subscribe(tabs => {
+        if (tabs.length === 1) {
+          appWindow.close();
+          return;
+        }
+
+        this.diffsService.removeDiff(diffId);
+        const currentTabIndex = tabs.findIndex(tab => tab.diffId === diffId);
+        const previousTab = tabs.at(currentTabIndex - 1);
+        this.router.navigate(['/tabs', previousTab!.diffId]);
+      });
   }
 
   private getDiffTitle(method: DiffMethod): string {

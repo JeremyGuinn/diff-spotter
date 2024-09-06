@@ -64,10 +64,6 @@ export class TabsComponent implements OnInit {
   }
 
   closeDiff(diffId: string, currentlyActive: boolean) {
-    // If the diff is the only one open, close the window
-    // If the diff is the active one, navigate to the previous diff
-    // Otherwise, remove the diff
-
     this.tabs.pipe(take(1)).subscribe(tabs => {
       if (tabs.length === 1) {
         appWindow.close();
