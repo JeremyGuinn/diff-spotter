@@ -1,9 +1,10 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -13,6 +14,22 @@ import { ImageUploadPreviewComponent } from '../image-upload-preview/image-uploa
 import { parse as parseExif } from 'exifr';
 import { ImageOverlayComponent } from '../image-overlay/image-overlay.component';
 import { ImageDiff } from '@app/services/diffs';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import {
+  remixArrowLeftRightFill,
+  remixFileAddLine,
+  remixImageFill,
+} from '@ng-icons/remixicon';
+
+enum DiffMode {
+  'split' = 'split',
+  'fade' = 'fade',
+  'slider' = 'slider',
+  'difference' = 'difference',
+  'highlight' = 'highlight',
+  'details' = 'details',
+}
+
 @Component({
   selector: 'app-image-diff',
   standalone: true,
@@ -21,12 +38,22 @@ import { ImageDiff } from '@app/services/diffs';
     ImageUploadInputComponent,
     ImageUploadPreviewComponent,
     ImageOverlayComponent,
+    NgIconComponent,
+  ],
+  providers: [
+    provideIcons({
+      remixArrowLeftRightFill,
+      remixImageFill,
+      remixFileAddLine,
+    }),
   ],
   templateUrl: './image-diff.component.html',
   styleUrl: './image-diff.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageDiffComponent {
+  private readonly document = inject(DOCUMENT);
+
   @Input() set images(images: ImageDiff['data']) {
     if (!images) return;
 
@@ -107,8 +134,25 @@ export class ImageDiffComponent {
     );
   });
 
-  mode: 'split' | 'fade' | 'slider' | 'difference' | 'highlight' | 'details' =
-    'fade';
+  mode: DiffMode = DiffMode.fade;
+  modes = Object.keys(DiffMode) as DiffMode[];
+
+  swapImages() {
+    const originalFile = this.originalFile();
+    const originalSrc = this.originalFileSrc();
+    const modifiedFile = this.modifiedFile();
+    const modifiedSrc = this.modifiedFileSrc();
+
+    this.originalFile.set(modifiedFile);
+    this.originalFileSrc.set(modifiedSrc);
+    this.modifiedFile.set(originalFile);
+    this.modifiedFileSrc.set(originalSrc);
+
+    this.imagesChange.emit({
+      original: modifiedFile,
+      modified: originalFile,
+    });
+  }
 
   handleFileUpload(file: File | null, isOriginal: boolean) {
     if (isOriginal) {
@@ -133,5 +177,18 @@ export class ImageDiffComponent {
 
   getSrc(file: File | null) {
     return file ? URL.createObjectURL(file) : '';
+  }
+
+  openFile(target: 'original' | 'modified') {
+    const input = this.document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.addEventListener('change', event => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        this.handleFileUpload(file, target === 'original');
+      }
+    });
+    input.click();
   }
 }

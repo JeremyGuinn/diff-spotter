@@ -28,7 +28,59 @@
 </div>
 
 <!-- Image diff stage -->
-<div class="flex size-full gap-8 p-2" *ngIf="modifiedFile() && originalFile()">
+<div
+  class="mt-2 flex size-full flex-col gap-2 p-2"
+  *ngIf="modifiedFile() && originalFile()">
+  <div class="flex justify-between">
+    <div class="flex flex-1 gap-2">
+      <button
+        class="btn btn-ghost btn-sm flex-1 justify-start"
+        (click)="openFile('original')">
+        <ng-icon name="remixImageFill"></ng-icon>
+        <span>{{ originalFile()?.name }}</span>
+      </button>
+      <button
+        class="btn btn-ghost btn-primary btn-sm"
+        (click)="openFile('original')">
+        <ng-icon name="remixFileAddLine"></ng-icon>
+        Open file
+      </button>
+    </div>
+    <div>
+      <button
+        class="btn btn-square btn-ghost btn-sm print:hidden"
+        (click)="swapImages()">
+        <ng-icon name="remixArrowLeftRightFill"></ng-icon>
+      </button>
+    </div>
+    <div class="flex flex-1 gap-2">
+      <button
+        class="btn btn-ghost btn-sm flex-1 justify-start"
+        (click)="openFile('modified')">
+        <ng-icon name="remixImageFill"></ng-icon>
+        <span>{{ modifiedFile()?.name }}</span>
+      </button>
+      <button
+        class="btn btn-ghost btn-primary btn-sm"
+        (click)="openFile('modified')">
+        <ng-icon name="remixFileAddLine"></ng-icon>
+        Open file
+      </button>
+    </div>
+  </div>
+
+  <div role="tablist" class="tabs-boxed tabs">
+    @for (option of modes; track $index) {
+      <button
+        role="tab"
+        class="tab"
+        [class.tab-active]="option === mode"
+        (click)="mode = option">
+        {{ option }}
+      </button>
+    }
+  </div>
+
   @switch (mode) {
     @case ('split') {
       <div class="flex h-fit bg-base-200 p-1">
@@ -43,7 +95,7 @@
     @case ('fade') {
       <!-- overlay the two images on each other -->
       <!-- create a slider -->
-      <div class="flex h-fit bg-base-200 p-1">
+      <div class="flex h-fit justify-center bg-base-200 p-1">
         <app-image-overlay
           [image1Src]="originalFileSrc()"
           [image2Src]="modifiedFileSrc()">
