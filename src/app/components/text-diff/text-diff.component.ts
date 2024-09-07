@@ -3,8 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   HostListener,
   inject,
+  Input,
+  Output,
   signal,
 } from '@angular/core';
 import {
@@ -34,6 +37,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   combineLatest,
   delay,
+  distinctUntilChanged,
   filter,
   map,
   ReplaySubject,
@@ -52,6 +56,7 @@ import { languages } from '@codemirror/language-data';
 import { javascript } from '@codemirror/lang-javascript';
 import { htmlLanguage, html } from '@codemirror/lang-html';
 import { cleanMultilineString } from '@lib/strings';
+import { TextDiffSettings } from '@app/services/diffs';
 
 @Component({
   selector: 'app-text-diff',
@@ -84,6 +89,41 @@ import { cleanMultilineString } from '@lib/strings';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextDiffComponent {
+  @Input() set showDiff(showDiff: boolean) {
+    if (showDiff) {
+      this.syncDocsWithDiff();
+    } else {
+      this.liveDiff.reset();
+    }
+  }
+
+  @Input() set texts(texts: { originalText: string; modifiedText: string }) {
+    if (!texts) return;
+
+    this.diffForm.patchValue({
+      originalText: texts.originalText ?? '',
+      modifiedText: texts.modifiedText ?? '',
+    });
+  }
+  @Input() set settings(settings: TextDiffSettings) {
+    if (settings) {
+      this.diffSettings.patchValue({
+        liveEdit: settings.liveEdit,
+        unifiedDiff: settings.unifiedDiff,
+        collapseLines: settings.collapseLines,
+        language: settings.language,
+        highlightMode: settings.highlightMode,
+      });
+    }
+  }
+
+  @Output() textsChange = new EventEmitter<{
+    originalText: string;
+    modifiedText: string;
+  }>();
+  @Output() diffChange = new EventEmitter<void>();
+  @Output() settingsChange = new EventEmitter<TextDiffSettings>();
+
   protected readonly EditorState = EditorState;
   protected readonly EditorView = EditorView;
   protected readonly unifiedMergeView = unifiedMergeView;
@@ -213,6 +253,27 @@ export class TextDiffComponent {
   );
 
   constructor() {
+    this.diffForm.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => {
+        this.textsChange.emit({
+          originalText: this.diffForm.value.originalText ?? '',
+          modifiedText: this.diffForm.value.modifiedText ?? '',
+        });
+      });
+
+    this.diffSettings.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => {
+        this.settingsChange.emit({
+          liveEdit: this.diffSettings.value.liveEdit,
+          unifiedDiff: this.diffSettings.value.unifiedDiff,
+          collapseLines: this.diffSettings.value.collapseLines,
+          highlightMode: this.diffSettings.value.highlightMode,
+          language: this.diffSettings.value.language,
+        });
+      });
+
     this.diffSettings.controls.liveEdit.valueChanges
       .pipe(
         takeUntilDestroyed(),
@@ -288,6 +349,8 @@ export class TextDiffComponent {
       originalText: this.diffForm.controls.originalText.value,
       modifiedText: this.diffForm.controls.modifiedText.value,
     });
+
+    this.diffChange.emit();
   }
 
   sortLines() {

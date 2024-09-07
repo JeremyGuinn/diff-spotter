@@ -1,13 +1,22 @@
 <div *ngIf="diff$ | async as diff" class="h-full">
   @switch (diff.method) {
     @case ('TEXT') {
-      <app-text-diff></app-text-diff>
+      <app-text-diff
+        [texts]="$any(diff.data)"
+        [showDiff]="$any(diff.data)?.diffed"
+        (diffChange)="updateTextDiffed($any(diff))"
+        (settingsChange)="updateTextDiffSettings($any(diff), $event)"
+        (textsChange)="updateTextDiffItems($any(diff), $event)"></app-text-diff>
     }
-    @case ('IMAGE') {}
+    @case ('IMAGE') {
+      <app-image-diff
+        [images]="$any(diff.data)"
+        (imagesChange)="updateImageDiffItems($event)"></app-image-diff>
+    }
     @default {
       <app-new-diff
         class="h-full"
-        (methodSelect)="newDiff($event)"></app-new-diff>
+        (methodSelect)="newDiff($any(diff), $event)"></app-new-diff>
     }
   }
 </div>

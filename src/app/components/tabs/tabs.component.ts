@@ -6,7 +6,8 @@ import {
   OnInit,
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { DiffsService, Diff, DiffMethod } from '@app/services/diffs.service';
+import { DiffsService } from '@app/services/diffs.service';
+import { Diff, DiffMethod } from '@app/services/diffs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   remixAddLine,
@@ -15,7 +16,7 @@ import {
   remixFileImageLine,
 } from '@ng-icons/remixicon';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { map, Observable, shareReplay, take, tap } from 'rxjs';
+import { map, Observable, shareReplay, take } from 'rxjs';
 import { TabComponent } from './tab/tab.component';
 
 const appWindow = getCurrentWindow();
@@ -37,7 +38,7 @@ export class TabsComponent implements OnInit {
     { title: string; diffId: string; icon: string }[]
   > = this.diffsService
     .getOpenDiffs()
-    .pipe(map(this.convertToTabs.bind(this)), shareReplay(1), tap(console.log));
+    .pipe(map(this.convertToTabs.bind(this)), shareReplay(1));
 
   icons = {
     [DiffMethod.NEW]: remixFileLine,
@@ -55,11 +56,9 @@ export class TabsComponent implements OnInit {
     const newDiff = {
       diffId: crypto.randomUUID(),
       title: 'New Diff',
-      left: '',
-      right: '',
       method: DiffMethod.NEW,
     };
-    this.diffsService.addDiff(newDiff);
+    this.diffsService.saveDiff(newDiff);
     this.router.navigate(['/tabs', newDiff.diffId]);
   }
 
@@ -81,7 +80,7 @@ export class TabsComponent implements OnInit {
 
   private convertToTabs(
     diffs: Diff<unknown>[]
-  ): { title: string; diffId: string }[] {
+  ): { title: string; diffId: string; icon: string }[] {
     return diffs.map(diff => ({
       title: diff.title,
       diffId: diff.diffId,

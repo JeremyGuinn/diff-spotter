@@ -5,7 +5,7 @@ import {
   EventEmitter,
   Output,
 } from '@angular/core';
-import { DiffMethod } from '@app/services/diffs.service';
+import { DiffMethod } from '@app/services/diffs';
 
 @Component({
   selector: 'app-new-diff',

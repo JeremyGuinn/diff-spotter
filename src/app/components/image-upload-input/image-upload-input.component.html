@@ -1,0 +1,19 @@
+<div
+  tabindex="-1"
+  (click)="fileInput.click()"
+  (keydown.enter)="fileInput.click()"
+  class="relative flex size-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-4 hover:border-blue-500 hover:bg-blue-100 dark:border-gray-700 dark:hover:border-blue-500 dark:hover:bg-blue-900">
+  <input
+    #fileInput
+    type="file"
+    class="hidden"
+    accept="image/*"
+    (change)="handleFileUpload($any($event.target).files)" />
+  <ng-icon name="remixImageFill" size="2rem"></ng-icon>
+  <p class="mt-2 text-sm font-bold text-gray-600 dark:text-gray-400">
+    Drop image here
+  </p>
+  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+    or click to browse
+  </p>
+</div>

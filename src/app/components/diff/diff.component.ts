@@ -6,19 +6,31 @@ import {
   inject,
   Input,
 } from '@angular/core';
-import { DiffMethod, DiffsService } from '@app/services/diffs.service';
-import { BehaviorSubject, combineLatest, filter, map, take, tap } from 'rxjs';
+import { DiffsService } from '@app/services/diffs.service';
+import {
+  DiffMethod,
+  NewDiff,
+  TextDiff,
+  TextDiffSettings,
+} from '@app/services/diffs';
+import { BehaviorSubject, combineLatest, filter, map, take } from 'rxjs';
 import { NewDiffComponent } from '../new-diff/new-diff.component';
 import { TextDiffComponent } from '../text-diff/text-diff.component';
 import { Router } from '@angular/router';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { ImageDiffComponent } from '../image-diff/image-diff.component';
 
 const appWindow = getCurrentWindow();
 
 @Component({
   selector: 'app-diff',
   standalone: true,
-  imports: [CommonModule, NewDiffComponent, TextDiffComponent],
+  imports: [
+    CommonModule,
+    NewDiffComponent,
+    TextDiffComponent,
+    ImageDiffComponent,
+  ],
   templateUrl: './diff.component.html',
   styleUrl: './diff.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,22 +57,15 @@ export class DiffComponent {
     diffs: this.diffsService.getOpenDiffs(),
   }).pipe(
     map(({ id, diffs }) => diffs.find(diff => diff.diffId === id)),
-    filter(diff => !!diff),
-    tap(console.log)
+    filter(diff => !!diff)
   );
 
-  newDiff(method: DiffMethod) {
-    const newDiff = {
-      diffId: crypto.randomUUID(),
+  newDiff(diff: NewDiff, method: DiffMethod) {
+    this.diffsService.saveDiff({
+      ...diff,
       title: this.getDiffTitle(method),
-      left: '',
-      right: '',
       method,
-    };
-
-    this.diffsService.removeDiff(this.id$.value);
-    this.diffsService.addDiff(newDiff);
-    this.router.navigate(['/tabs', newDiff.diffId]);
+    });
   }
 
   closeDiff(diffId: string) {
@@ -78,6 +83,62 @@ export class DiffComponent {
         const previousTab = tabs.at(currentTabIndex - 1);
         this.router.navigate(['/tabs', previousTab!.diffId]);
       });
+  }
+
+  updateTextDiffed(diff: TextDiff) {
+    this.diffsService.saveDiff({
+      ...diff,
+      data: {
+        ...diff.data,
+        diffed: true,
+      },
+    });
+  }
+
+  updateTextDiffSettings(diff: TextDiff, settings: TextDiffSettings) {
+    console.log(diff, settings);
+    this.diffsService.saveDiff({
+      ...diff,
+      data: {
+        ...diff.data,
+        settings,
+      },
+    });
+  }
+
+  updateTextDiffItems(
+    diff: TextDiff,
+    texts: { originalText: string; modifiedText: string }
+  ) {
+    this.diffsService.saveDiff({
+      ...diff,
+      data: {
+        ...diff.data,
+        originalText: texts.originalText,
+        modifiedText: texts.modifiedText,
+      },
+    });
+  }
+
+  updateImageDiffItems(files: {
+    original: File | null;
+    modified: File | null;
+  }) {
+    this.diffsService.saveDiff({
+      diffId: this.id$.value,
+      title: this.getDiffTitle(DiffMethod.IMAGE),
+      method: DiffMethod.IMAGE,
+      data: {
+        originalSrc: this.getSrc(files.original),
+        modifiedSrc: this.getSrc(files.modified),
+        originalFile: files.original,
+        modifiedFile: files.modified,
+      },
+    });
+  }
+
+  private getSrc(file: File | null): string {
+    return file ? URL.createObjectURL(file) : '';
   }
 
   private getDiffTitle(method: DiffMethod): string {

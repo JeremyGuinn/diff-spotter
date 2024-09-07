@@ -1,0 +1,83 @@
+<!-- Image picking stage -->
+
+<div
+  class="flex size-full items-center justify-center gap-8 p-2"
+  *ngIf="!modifiedFile() || !originalFile()">
+  <div class="size-full">
+    <app-image-upload-input
+      *ngIf="!originalFile()"
+      (fileUpload)="handleFileUpload($event, true)"
+      class="mb-4"></app-image-upload-input>
+
+    <app-image-upload-preview
+      *ngIf="originalFile() as file"
+      [file]="file"
+      (remove)="handleFileRemove(true)"></app-image-upload-preview>
+  </div>
+  <div class="size-full">
+    <app-image-upload-input
+      *ngIf="!modifiedFile()"
+      (fileUpload)="handleFileUpload($event, false)"
+      class="mb-4"></app-image-upload-input>
+
+    <app-image-upload-preview
+      *ngIf="modifiedFile() as file"
+      [file]="file"
+      (remove)="handleFileRemove(false)"></app-image-upload-preview>
+  </div>
+</div>
+
+<!-- Image diff stage -->
+<div class="flex size-full gap-8 p-2" *ngIf="modifiedFile() && originalFile()">
+  @switch (mode) {
+    @case ('split') {
+      <div class="flex h-fit bg-base-200 p-1">
+        <div class="flex flex-1 items-start justify-center">
+          <img [src]="originalFileSrc()" alt="Original image" class="" />
+        </div>
+        <div class="flex flex-1 items-start justify-center">
+          <img [src]="modifiedFileSrc()" alt="Modified image" class="" />
+        </div>
+      </div>
+    }
+    @case ('fade') {
+      <!-- overlay the two images on each other -->
+      <!-- create a slider -->
+      <div class="flex h-fit bg-base-200 p-1">
+        <app-image-overlay
+          [image1Src]="originalFileSrc()"
+          [image2Src]="modifiedFileSrc()">
+        </app-image-overlay>
+      </div>
+    }
+    @case ('slider') {
+      <div class="diff">
+        <div class="diff-item-1">
+          <img [src]="originalFileSrc()" alt="Original image" class="" />
+        </div>
+        <div class="diff-item-2">
+          <img [src]="modifiedFileSrc()" alt="Modified image" class="" />
+        </div>
+        <div class="diff-resizer"></div>
+      </div>
+    }
+    @case ('difference') {}
+    @case ('highlight') {}
+    @case ('details') {
+      <div class="flex h-fit bg-base-200 p-1">
+        <div class="flex flex-col items-center">
+          <img
+            [src]="originalFileSrc()"
+            alt="Original image"
+            class="max-h-52" />
+        </div>
+        <div class="flex flex-col items-center">
+          <img
+            [src]="modifiedFileSrc()"
+            alt="Modified image"
+            class="max-h-52" />
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -1,27 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-export enum DiffMethod {
-  TEXT = 'TEXT',
-  IMAGE = 'IMAGE',
-  NEW = 'NEW',
-}
-
-export interface TextDiff extends Diff<string> {
-  method: DiffMethod.TEXT;
-}
-
-export interface ImageDiff extends Diff<Blob> {
-  method: DiffMethod.IMAGE;
-}
-
-export interface Diff<T> {
-  diffId: string;
-  title: string;
-  left: T;
-  right: T;
-  method: DiffMethod;
-}
+import { DiffType, Diff } from './diffs';
 
 @Injectable({
   providedIn: 'root',
@@ -32,14 +11,18 @@ export class DiffsService {
 
   constructor() {}
 
-  addDiff(diff: Diff<unknown>) {
+  saveDiff<T extends DiffType>(diff: T, { emit = true } = {}) {
     this.openDiffs.set(diff.diffId, diff);
-    this.openDiffsSubject.next([...this.openDiffs.values()]);
+    if (emit) {
+      this.openDiffsSubject.next([...this.openDiffs.values()]);
+    }
   }
 
-  removeDiff(diff: string) {
+  removeDiff(diff: string, { emit = true } = {}) {
     this.openDiffs.delete(diff);
-    this.openDiffsSubject.next([...this.openDiffs.values()]);
+    if (emit) {
+      this.openDiffsSubject.next([...this.openDiffs.values()]);
+    }
   }
 
   getOpenDiffs(): Observable<Diff<unknown>[]> {
