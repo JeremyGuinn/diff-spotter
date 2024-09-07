@@ -1,4 +1,8 @@
-import { APP_INITIALIZER, ApplicationConfig } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  provideExperimentalZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -10,6 +14,7 @@ import { MenuService } from './services/menu.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideExperimentalZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
     provideAnimationsAsync(),
 
