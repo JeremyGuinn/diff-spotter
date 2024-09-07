@@ -20,6 +20,7 @@ import {
   remixFileAddLine,
   remixImageFill,
 } from '@ng-icons/remixicon';
+import { getImageSrc } from '@lib/images';
 
 enum DiffMode {
   'split' = 'split',
@@ -61,10 +62,10 @@ export class ImageDiffComponent {
     this.modifiedFile.set(images.modifiedFile);
 
     this.originalFileSrc.set(
-      images.originalSrc || this.getSrc(images.originalFile)
+      images.originalSrc || getImageSrc(images.originalFile)
     );
     this.modifiedFileSrc.set(
-      images.modifiedSrc || this.getSrc(images.modifiedFile)
+      images.modifiedSrc || getImageSrc(images.modifiedFile)
     );
   }
 
@@ -85,10 +86,10 @@ export class ImageDiffComponent {
     if (!file) return null;
 
     const image = new Image();
-    image.src = this.getSrc(file);
+    image.src = getImageSrc(file);
 
     return {
-      src: this.getSrc(file),
+      src: getImageSrc(file),
       exif: parseExif(file),
       file,
       width: image.width,
@@ -102,10 +103,10 @@ export class ImageDiffComponent {
     if (!file) return null;
 
     const image = new Image();
-    image.src = this.getSrc(file);
+    image.src = getImageSrc(file);
 
     return {
-      src: this.getSrc(file),
+      src: getImageSrc(file),
       exif: parseExif(file),
       file,
       width: image.width,
@@ -144,8 +145,9 @@ export class ImageDiffComponent {
     const modifiedSrc = this.modifiedFileSrc();
 
     this.originalFile.set(modifiedFile);
-    this.originalFileSrc.set(modifiedSrc);
     this.modifiedFile.set(originalFile);
+
+    this.originalFileSrc.set(modifiedSrc);
     this.modifiedFileSrc.set(originalSrc);
 
     this.imagesChange.emit({
@@ -173,10 +175,6 @@ export class ImageDiffComponent {
     } else {
       this.modifiedFile.set(null);
     }
-  }
-
-  getSrc(file: File | null) {
-    return file ? URL.createObjectURL(file) : '';
   }
 
   openFile(target: 'original' | 'modified') {

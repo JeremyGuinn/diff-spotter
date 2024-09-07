@@ -19,6 +19,7 @@ import { TextDiffComponent } from '../text-diff/text-diff.component';
 import { Router } from '@angular/router';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { ImageDiffComponent } from '../image-diff/image-diff.component';
+import { getImageSrc } from '@lib/images';
 
 const appWindow = getCurrentWindow();
 
@@ -129,8 +130,8 @@ export class DiffComponent {
       title: this.getDiffTitle(DiffMethod.IMAGE),
       method: DiffMethod.IMAGE,
       data: {
-        originalSrc: this.getSrc(files.original),
-        modifiedSrc: this.getSrc(files.modified),
+        originalSrc: getImageSrc(files.original),
+        modifiedSrc: getImageSrc(files.modified),
         originalFile: files.original,
         modifiedFile: files.modified,
       },
