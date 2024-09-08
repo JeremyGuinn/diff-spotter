@@ -6,11 +6,13 @@
       max="100"
       class="slider w-full cursor-pointer"
       [(ngModel)]="sliderValue"
-      #slider />
+      #slider
+    />
     <div
       class="pointer-events-none absolute left-0 top-0 flex size-8 select-none items-center justify-center text-center"
       [style.left.%]="sliderValue"
-      [style.transform]="'translate(-' + sliderValue + '%, -50%)'">
+      [style.transform]="'translate(-' + sliderValue + '%, -50%)'"
+    >
       <ng-icon name="remixExpandLeftRightLine"></ng-icon>
     </div>
   </div>
@@ -21,12 +23,14 @@
     [src]="image1Src"
     [style.opacity]="sliderValue / 100"
     class="absolute inset-0 size-full"
-    alt="Image 1" />
+    alt="Image 1"
+  />
 
   <!-- Second image with dynamic opacity, scaled to fit the container -->
   <img
     [src]="image2Src"
     [style.opacity]="1 - sliderValue / 100"
     class="inset-0 size-full"
-    alt="Image 2" />
+    alt="Image 2"
+  />
 </div>

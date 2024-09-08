@@ -1,9 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ['src/**/*.{html,ts}'],
   plugins: [require('daisyui')],
   darkMode: ['selector', '[data-theme="dark"]'],
   daisyui: {
+    logs: false,
     themes: [
       {
         light: {

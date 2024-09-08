@@ -1,18 +1,7 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostListener,
-  inject,
-  Input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, Input } from '@angular/core';
 import { DiffsService } from '@app/services/diffs.service';
-import {
-  DiffMethod,
-  NewDiff,
-  TextDiff,
-  TextDiffSettings,
-} from '@app/services/diffs';
+import { DiffMethod, NewDiff, TextDiff, TextDiffSettings } from '@app/services/diffs';
 import { BehaviorSubject, combineLatest, filter, map, take } from 'rxjs';
 import { NewDiffComponent } from '../new-diff/new-diff.component';
 import { TextDiffComponent } from '../text-diff/text-diff.component';
@@ -58,7 +47,7 @@ export class DiffComponent {
     diffs: this.diffsService.getOpenDiffs(),
   }).pipe(
     map(({ id, diffs }) => diffs.find(diff => diff.diffId === id)),
-    filter(diff => !!diff)
+    filter(diff => !!diff),
   );
 
   newDiff(diff: NewDiff, method: DiffMethod) {
@@ -107,10 +96,7 @@ export class DiffComponent {
     });
   }
 
-  updateTextDiffItems(
-    diff: TextDiff,
-    texts: { originalText: string; modifiedText: string }
-  ) {
+  updateTextDiffItems(diff: TextDiff, texts: { originalText: string; modifiedText: string }) {
     this.diffsService.saveDiff({
       ...diff,
       data: {
@@ -121,10 +107,7 @@ export class DiffComponent {
     });
   }
 
-  updateImageDiffItems(files: {
-    original: File | null;
-    modified: File | null;
-  }) {
+  updateImageDiffItems(files: { original: File | null; modified: File | null }) {
     this.diffsService.saveDiff({
       diffId: this.id$.value,
       title: this.getDiffTitle(DiffMethod.IMAGE),
@@ -143,9 +126,7 @@ export class DiffComponent {
   }
 
   private getDiffTitle(method: DiffMethod): string {
-    const methodTitle = method
-      .toLocaleLowerCase()
-      .replace(/^\w/, c => c.toUpperCase());
+    const methodTitle = method.toLocaleLowerCase().replace(/^\w/, c => c.toUpperCase());
     return `${methodTitle} Diff`;
   }
 }

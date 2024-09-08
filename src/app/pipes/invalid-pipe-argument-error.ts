@@ -8,9 +8,9 @@ export class InvalidPipeArgumentError extends Error {
 
 export function invalidPipeArgumentError(
   type: Type<unknown>,
-  value: unknown
+  value: unknown,
 ): InvalidPipeArgumentError {
   return new InvalidPipeArgumentError(
-    `InvalidPipeArgument: '${value}' for pipe '${stringify(type)}'`
+    `InvalidPipeArgument: '${value}' for pipe '${stringify(type)}'`,
   );
 }

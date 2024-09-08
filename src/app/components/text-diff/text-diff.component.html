@@ -13,13 +13,15 @@
               <button
                 class="btn btn-square btn-ghost btn-sm"
                 [class.btn-active]="activeTab() === 'settings'"
-                (click)="activeTab.set('settings')">
+                (click)="activeTab.set('settings')"
+              >
                 <ng-icon name="remixSoundModuleLine"></ng-icon>
               </button>
               <button
                 class="btn btn-square btn-ghost btn-sm"
                 [class.btn-active]="activeTab() === 'history'"
-                (click)="activeTab.set('history')">
+                (click)="activeTab.set('history')"
+              >
                 <ng-icon name="remixHistoryLine"></ng-icon>
               </button>
             </span>
@@ -33,7 +35,8 @@
                   type="checkbox"
                   class="toggle toggle-sm"
                   id="liveEdit"
-                  [formControl]="diffSettings.controls.liveEdit" />
+                  [formControl]="diffSettings.controls.liveEdit"
+                />
               </div>
 
               <div class="flex items-center justify-between gap-2">
@@ -42,43 +45,38 @@
                   type="checkbox"
                   class="toggle toggle-sm"
                   id="unifiedDiff"
-                  [formControl]="diffSettings.controls.unifiedDiff" />
+                  [formControl]="diffSettings.controls.unifiedDiff"
+                />
               </div>
 
               <div class="flex items-center justify-between gap-2">
-                <label class="label p-0" for="collapseLines"
-                  >Collapse lines</label
-                >
+                <label class="label p-0" for="collapseLines">Collapse lines</label>
                 <input
                   type="checkbox"
                   class="toggle toggle-sm"
                   id="collapseLines"
-                  [formControl]="diffSettings.controls.collapseLines" />
+                  [formControl]="diffSettings.controls.collapseLines"
+                />
               </div>
             </div>
 
             <div class="flex flex-col gap-2">
               <span class="text-tiny uppercase">Highlight change</span>
               <div
-                class="flex items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                class="flex items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800"
+              >
                 <button
                   class="btn btn-ghost btn-sm flex-1"
-                  [class.btn-active]="
-                    diffSettings.controls.highlightMode.value === 'line'
-                  "
-                  (click)="
-                    diffSettings.controls.highlightMode.setValue('line')
-                  ">
+                  [class.btn-active]="diffSettings.controls.highlightMode.value === 'line'"
+                  (click)="diffSettings.controls.highlightMode.setValue('line')"
+                >
                   Line
                 </button>
                 <button
                   class="btn btn-ghost btn-sm flex-1"
-                  [class.btn-active]="
-                    diffSettings.controls.highlightMode.value === 'character'
-                  "
-                  (click)="
-                    diffSettings.controls.highlightMode.setValue('character')
-                  ">
+                  [class.btn-active]="diffSettings.controls.highlightMode.value === 'character'"
+                  (click)="diffSettings.controls.highlightMode.setValue('character')"
+                >
                   Character
                 </button>
               </div>
@@ -86,8 +84,7 @@
 
             <div class="flex flex-col gap-2">
               <span class="text-tiny uppercase">Syntax highlighting</span>
-              <div
-                class="flex items-center justify-between gap-0.5 rounded-md p-0.5">
+              <div class="flex items-center justify-between gap-0.5 rounded-md p-0.5">
                 <select class="select select-bordered select-sm w-full">
                   <option disabled selected hidden>Choose syntax</option>
                   <option value="">None</option>
@@ -101,25 +98,30 @@
             <div class="flex flex-col gap-2">
               <span class="text-tiny uppercase">Tools</span>
               <div
-                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800"
+              >
                 <button
                   class="btn btn-ghost btn-sm inline-block w-full text-left"
-                  (click)="toLowerCase()">
+                  (click)="toLowerCase()"
+                >
                   To lowercase
                 </button>
                 <button
                   class="btn btn-ghost btn-sm inline-block w-full text-left"
-                  (click)="sortLines()">
+                  (click)="sortLines()"
+                >
                   Sort lines
                 </button>
                 <button
                   class="btn btn-ghost btn-sm inline-block h-1 w-full text-left"
-                  (click)="replaceLineBreaks()">
+                  (click)="replaceLineBreaks()"
+                >
                   Replace line breaks with spaces
                 </button>
                 <button
                   class="btn btn-ghost btn-sm inline-block w-full text-left"
-                  (click)="trimWhitespace()">
+                  (click)="trimWhitespace()"
+                >
                   Trim whitespace
                 </button>
               </div>
@@ -127,11 +129,13 @@
 
             <div class="">
               <div
-                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800"
+              >
                 <button
                   class="item-center btn btn-ghost btn-sm w-full justify-start text-left"
                   [disabled]="diffSettings.controls.liveEdit.value"
-                  (click)="print()">
+                  (click)="print()"
+                >
                   <ng-icon name="remixUploadLine"></ng-icon>
                   Export as PDF
                 </button>
@@ -140,11 +144,13 @@
 
             <div class="">
               <div
-                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800">
+                class="flex flex-col items-center justify-between gap-0.5 rounded-md bg-gray-200 p-0.5 dark:bg-gray-800"
+              >
                 <button
                   class="item-center btn btn-ghost btn-sm w-full justify-start text-left"
                   [disabled]="diffSettings.controls.liveEdit.value"
-                  (click)="editorSection.scrollIntoView()">
+                  (click)="editorSection.scrollIntoView()"
+                >
                   <ng-icon name="remixArrowDownLine"></ng-icon>
                   Skip to editor
                 </button>
@@ -158,9 +164,7 @@
       <div class="w-full px-2 pb-2">
         <div class="sticky top-0 z-10 flex justify-end bg-base-100 py-2">
           <div class="flex items-center justify-end gap-2 print:hidden">
-            <button class="btn btn-outline btn-sm" (click)="clear()">
-              Clear
-            </button>
+            <button class="btn btn-outline btn-sm" (click)="clear()">Clear</button>
             <button class="btn btn-success btn-sm">
               <ng-icon name="remixSaveLine"></ng-icon>
               Save as a file
@@ -170,10 +174,10 @@
 
         <div
           *ngIf="diffStats | async as stats"
-          class="mb-1 flex justify-between gap-3 border-b border-b-gray-200 px-2 dark:border-b-gray-600">
+          class="mb-1 flex justify-between gap-3 border-b border-b-gray-200 px-2 dark:border-b-gray-600"
+        >
           <div class="flex flex-1 items-center justify-between">
-            <div
-              class="flex items-center gap-1 font-semibold text-red-700 dark:text-red-600">
+            <div class="flex items-center gap-1 font-semibold text-red-700 dark:text-red-600">
               <ng-icon name="remixIndeterminateCircleFill"></ng-icon>
               <span>
                 {{ stats.removals | i18nPlural: pluralMapping('removal') }}
@@ -181,26 +185,19 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-400">
-                {{
-                  stats.totalOriginalLines | i18nPlural: pluralMapping('line')
-                }}
+                {{ stats.totalOriginalLines | i18nPlural: pluralMapping('line') }}
               </span>
-              <app-copy-button
-                class="print:hidden"
-                [text]="liveDiff.controls.originalText.value">
+              <app-copy-button class="print:hidden" [text]="liveDiff.controls.originalText.value">
               </app-copy-button>
             </div>
           </div>
           <div class="">
-            <button
-              class="btn btn-square btn-ghost btn-sm print:hidden"
-              (click)="swapTexts()">
+            <button class="btn btn-square btn-ghost btn-sm print:hidden" (click)="swapTexts()">
               <ng-icon name="remixArrowLeftRightFill"></ng-icon>
             </button>
           </div>
           <div class="flex flex-1 items-center justify-between">
-            <div
-              class="flex items-center gap-1 font-semibold text-green-700 dark:text-green-600">
+            <div class="flex items-center gap-1 font-semibold text-green-700 dark:text-green-600">
               <ng-icon name="remixAddCircleFill"></ng-icon>
               <span>
                 {{ stats.additions | i18nPlural: pluralMapping('addition') }}
@@ -208,13 +205,12 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-400">
-                {{
-                  stats.totalModifiedLines | i18nPlural: pluralMapping('line')
-                }}
+                {{ stats.totalModifiedLines | i18nPlural: pluralMapping('line') }}
               </span>
               <app-copy-button
                 class="print:hidden"
-                [text]="liveDiff.controls.modifiedText.value"></app-copy-button>
+                [text]="liveDiff.controls.modifiedText.value"
+              ></app-copy-button>
             </div>
           </div>
         </div>
@@ -225,25 +221,16 @@
           [originalExtensions]="(diffExtensions | async)!"
           [modifiedExtensions]="(diffExtensions | async)!"
           [collapseUnchanged]="
-            diffSettings.controls.collapseLines.value
-              ? { margin: 3, minSize: 4 }
-              : undefined
+            diffSettings.controls.collapseLines.value ? { margin: 3, minSize: 4 } : undefined
           "
-          [revertControls]="
-            !diffSettings.controls.liveEdit.value ? 'a-to-b' : undefined
-          "
-          [highlightChanges]="
-            diffSettings.controls.highlightMode.value === 'character'
-          "
+          [revertControls]="!diffSettings.controls.liveEdit.value ? 'a-to-b' : undefined"
+          [highlightChanges]="diffSettings.controls.highlightMode.value === 'character'"
           [originalValue]="liveDiff.controls.originalText.value"
           [modifiedValue]="liveDiff.controls.modifiedText.value"
-          (modifiedValueChange)="
-            diffForm.controls.modifiedText.setValue($event)
-          "
-          (originalValueChange)="
-            diffForm.controls.originalText.setValue($event)
-          "
-          (viewReady)="diffMergeView.next($event)"></app-diff-editor>
+          (modifiedValueChange)="diffForm.controls.modifiedText.setValue($event)"
+          (originalValueChange)="diffForm.controls.originalText.setValue($event)"
+          (viewReady)="diffMergeView.next($event)"
+        ></app-diff-editor>
 
         <app-code-editor
           *ngIf="diffSettings.controls.unifiedDiff.value"
@@ -253,7 +240,8 @@
           [readonly]="!diffSettings.controls.liveEdit.value"
           [lineWrapping]="true"
           [extensions]="(unifiedDiffExtensions | async)!"
-          [theme]="(editorTheme | async)!"></app-code-editor>
+          [theme]="(editorTheme | async)!"
+        ></app-code-editor>
       </div>
     </div>
   }
@@ -270,9 +258,7 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <span class="text-content text-sm"
-              >Your saved diffs will appear here.</span
-            >
+            <span class="text-content text-sm">Your saved diffs will appear here.</span>
           </div>
         </div>
       </div>
@@ -285,7 +271,8 @@
               <label class="label" for="originalText">Original Text</label>
               <button
                 class="btn btn-ghost btn-primary btn-sm"
-                (click)="openFile(diffForm.controls.originalText)">
+                (click)="openFile(diffForm.controls.originalText)"
+              >
                 <ng-icon name="remixFileAddLine"></ng-icon>
                 Open file
               </button>
@@ -298,7 +285,8 @@
               [lineWrapping]="true"
               data-control="originalText"
               minHeight="300px"
-              [style.height.px]="300">
+              [style.height.px]="300"
+            >
             </app-code-editor>
           </div>
 
@@ -307,7 +295,8 @@
               <label class="label" for="modifiedText">Modified Text</label>
               <button
                 class="btn btn-ghost btn-primary btn-sm"
-                (click)="openFile(diffForm.controls.modifiedText)">
+                (click)="openFile(diffForm.controls.modifiedText)"
+              >
                 <ng-icon name="remixFileAddLine"></ng-icon>
                 Open file
               </button>
@@ -318,14 +307,13 @@
               [lineWrapping]="true"
               data-control="modifiedText"
               minHeight="300px"
-              [style.height.px]="300">
+              [style.height.px]="300"
+            >
             </app-code-editor>
           </div>
         </div>
 
-        <button class="btn btn-primary w-full" (click)="findDiff()">
-          Find Differences
-        </button>
+        <button class="btn btn-primary w-full" (click)="findDiff()">Find Differences</button>
       </div>
     }
   </div>

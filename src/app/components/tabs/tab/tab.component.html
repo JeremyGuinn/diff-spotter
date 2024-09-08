@@ -2,13 +2,15 @@
   role="tab"
   class="group tab flex w-full shrink items-center justify-between px-1 py-0 hover:bg-gray-100 dark:hover:bg-gray-800"
   [title]="title"
-  [class.tab-active]="active.isActive">
+  [class.tab-active]="active.isActive"
+>
   <a
     class="inline-flex h-full flex-1 items-center justify-start gap-2 overflow-hidden"
     [routerLink]="link"
     routerLinkActive=""
     #anchorLink
-    #active="routerLinkActive">
+    #active="routerLinkActive"
+  >
     <ng-icon *ngIf="icon" [svg]="icon"></ng-icon>
     <span class="relative flex-1 truncate text-left">{{ title }}</span>
   </a>
@@ -19,7 +21,8 @@
     class="btn btn-circle btn-ghost btn-xs group-hover:visible"
     tabindex="-1"
     (keydown.enter)="close(active.isActive)"
-    (click)="close(active.isActive)">
+    (click)="close(active.isActive)"
+  >
     <ng-icon name="remixCloseLine"></ng-icon>
   </span>
 </div>

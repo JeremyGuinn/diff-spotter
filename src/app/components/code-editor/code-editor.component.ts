@@ -50,10 +50,7 @@ export const External = Annotation.define<boolean>();
     },
   ],
 })
-export class CodeEditorComponent
-  extends CodeEditor
-  implements OnChanges, OnInit
-{
+export class CodeEditorComponent extends CodeEditor implements OnChanges, OnInit {
   @Input() minHeight?: string;
 
   constructor(private elementRef: ElementRef) {
@@ -63,7 +60,7 @@ export class CodeEditorComponent
   override ngOnChanges(changes: SimpleChanges): void {
     const staticSettings = ['languages', 'extensions'];
     const staticSettingsUpdated = Object.entries(changes).some(
-      ([key, value]) => staticSettings.includes(key) && !value.firstChange
+      ([key, value]) => staticSettings.includes(key) && !value.firstChange,
     );
     if (staticSettingsUpdated) {
       this.ngOnDestroy();
@@ -73,7 +70,7 @@ export class CodeEditorComponent
     if (changes['minHeight']) {
       (this.elementRef.nativeElement as HTMLElement).style.setProperty(
         '--code-editor-min-height',
-        this.minHeight ?? 'auto'
+        this.minHeight ?? 'auto',
       );
     }
 

@@ -3,6 +3,9 @@
     "angular-*": {
       "style": "scss",
       "externalTemplate": true
+    },
+    "angular-component": {
+      "skipDisplayBlock": true
     }
   },
   "[html]": {
@@ -22,5 +25,8 @@
   },
   "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.inlineSuggest.enabled": true,
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "files.autoSave": "afterDelay",
+  "editor.formatOnSave": true,
+  "javascript.updateImportsOnFileMove.enabled": "always"
 }

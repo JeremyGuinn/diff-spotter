@@ -1,26 +1,12 @@
 import { Inject, Injectable } from '@angular/core';
-import {
-  BehaviorSubject,
-  firstValueFrom,
-  from,
-  map,
-  Observable,
-  of,
-  switchMap,
-  take,
-} from 'rxjs';
+import { BehaviorSubject, firstValueFrom, from, map, Observable, of, switchMap, take } from 'rxjs';
 import { StorageService } from './storage/storage.service';
 
 @Injectable()
 export class PreferencesService<T extends object> {
-  constructor(
-    @Inject(StorageService) private readonly storage: StorageService
-  ) {}
+  constructor(@Inject(StorageService) private readonly storage: StorageService) {}
 
-  private readonly preferencesSubjects = new Map<
-    string,
-    BehaviorSubject<T | null>
-  >();
+  private readonly preferencesSubjects = new Map<string, BehaviorSubject<T | null>>();
 
   public getPreferences(key: string): Observable<T | null> {
     if (!this.preferencesSubjects.has(key)) {
@@ -35,7 +21,7 @@ export class PreferencesService<T extends object> {
           preferenceSubject.next(preferences);
         }
       }),
-      switchMap(() => preferenceSubject.asObservable())
+      switchMap(() => preferenceSubject.asObservable()),
     );
   }
 
@@ -53,10 +39,7 @@ export class PreferencesService<T extends object> {
     return this.storage.removeItem(key);
   }
 
-  public updatePreferences(
-    key: string,
-    partialPreferences: Partial<T>
-  ): Promise<void> {
+  public updatePreferences(key: string, partialPreferences: Partial<T>): Promise<void> {
     return firstValueFrom(
       this.getPreferences(key).pipe(
         take(1),
@@ -69,46 +52,33 @@ export class PreferencesService<T extends object> {
             ...existingPreferences,
             ...partialPreferences,
           });
-        })
-      )
+        }),
+      ),
     );
   }
 
-  public ensurePreferences(
-    key: string,
-    defaultPreferences: T
-  ): Observable<void> {
+  public ensurePreferences(key: string, defaultPreferences: T): Observable<void> {
     return this.getPreferences(key).pipe(
       switchMap(preferences => {
-        if (
-          !preferences ||
-          !this.validatePreferencesStructure(preferences, defaultPreferences)
-        ) {
+        if (!preferences || !this.validatePreferencesStructure(preferences, defaultPreferences)) {
           return this.setPreferences(
             key,
-            this.rectifyPreferencesStructure(preferences, defaultPreferences)
+            this.rectifyPreferencesStructure(preferences, defaultPreferences),
           );
         }
 
         return of();
-      })
+      }),
     );
   }
 
-  private validatePreferencesStructure(
-    preferences: T,
-    defaultPreferences: T
-  ): preferences is T {
+  private validatePreferencesStructure(preferences: T, defaultPreferences: T): preferences is T {
     return Object.keys(defaultPreferences).every(key => key in preferences);
   }
 
-  private rectifyPreferencesStructure(
-    preferences: T | null,
-    defaultPreferences: T
-  ): T {
+  private rectifyPreferencesStructure(preferences: T | null, defaultPreferences: T): T {
     return Object.keys(defaultPreferences).reduce((acc, key) => {
-      acc[key as keyof T] =
-        preferences?.[key as keyof T] ?? defaultPreferences[key as keyof T];
+      acc[key as keyof T] = preferences?.[key as keyof T] ?? defaultPreferences[key as keyof T];
       return acc;
     }, {} as T);
   }

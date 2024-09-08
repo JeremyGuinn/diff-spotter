@@ -9,8 +9,6 @@ export class DiffsService {
   private openDiffs = new Map<string, Diff<unknown>>();
   private openDiffsSubject = new BehaviorSubject<Diff<unknown>[]>([]);
 
-  constructor() {}
-
   saveDiff<T extends DiffType>(diff: T, { emit = true } = {}) {
     this.openDiffs.set(diff.diffId, diff);
     if (emit) {

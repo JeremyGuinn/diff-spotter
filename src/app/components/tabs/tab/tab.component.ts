@@ -13,11 +13,7 @@ import {
 } from '@angular/core';
 import { RouterLinkActive, RouterModule } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import {
-  remixAddLine,
-  remixFileFill,
-  remixCloseLine,
-} from '@ng-icons/remixicon';
+import { remixAddLine, remixFileFill, remixCloseLine } from '@ng-icons/remixicon';
 
 @Component({
   selector: 'app-tab',
@@ -47,17 +43,11 @@ export class TabComponent implements AfterViewInit, OnDestroy {
   @ViewChild('anchorLink') anchor?: ElementRef<HTMLAnchorElement>;
 
   ngAfterViewInit(): void {
-    this.anchor?.nativeElement.addEventListener(
-      'auxclick',
-      this.handleMiddleClick.bind(this)
-    );
+    this.anchor?.nativeElement.addEventListener('auxclick', this.handleMiddleClick.bind(this));
   }
 
   ngOnDestroy(): void {
-    this.anchor?.nativeElement.removeEventListener(
-      'auxclick',
-      this.handleMiddleClick.bind(this)
-    );
+    this.anchor?.nativeElement.removeEventListener('auxclick', this.handleMiddleClick.bind(this));
   }
 
   close(active: boolean) {

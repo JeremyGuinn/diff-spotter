@@ -35,26 +35,21 @@ const Base10UnitValues = Object.values(Base10Unit);
 export class BytesPipe implements PipeTransform {
   constructor(
     @Inject(LOCALE_ID) private _locale: string,
-    private _decimalPipe: DecimalPipe
+    private _decimalPipe: DecimalPipe,
   ) {}
 
   transform(
     value: number | string,
     base?: '2' | '10',
     digitsInfo?: string,
-    locale?: string
+    locale?: string,
   ): string | null;
-  transform(
-    value: null | undefined,
-    base?: '2' | '10',
-    digitsInfo?: string,
-    locale?: string
-  ): null;
+  transform(value: null | undefined, base?: '2' | '10', digitsInfo?: string, locale?: string): null;
   transform(
     value: number | string | null | undefined,
     base: '2' | '10',
     digitsInfo: string,
-    locale?: string
+    locale?: string,
   ): string | null;
 
   /**
@@ -67,7 +62,7 @@ export class BytesPipe implements PipeTransform {
     value: number | string | null | undefined,
     base?: '2' | '10',
     digitsInfo?: string,
-    locale?: string
+    locale?: string,
   ): string | null {
     if (!isValue(value)) {
       return null;
@@ -80,7 +75,7 @@ export class BytesPipe implements PipeTransform {
     try {
       const num = strToNumber(value);
       return formatBytes(num, base, digitsInfo, locale, this._decimalPipe);
-    } catch (error) {
+    } catch {
       throw invalidPipeArgumentError(BytesPipe, value);
     }
   }
@@ -94,7 +89,7 @@ export function formatBytes(
   base: '2' | '10',
   digitsInfo: string,
   locale: string,
-  decimalPipe: DecimalPipe
+  decimalPipe: DecimalPipe,
 ): string {
   return base === '2'
     ? formatBase2Bytes(value, digitsInfo, locale, decimalPipe)
@@ -108,7 +103,7 @@ export function formatBase2Bytes(
   value: number,
   digitsInfo: string,
   locale: string,
-  decimalPipe: DecimalPipe
+  decimalPipe: DecimalPipe,
 ): string {
   const exp = Math.floor(Math.log(value) / Math.log(1024));
   const valueInUnit = value / Math.pow(1024, exp);
@@ -124,7 +119,7 @@ export function formatBase10Bytes(
   value: number,
   digitsInfo: string,
   locale: string,
-  decimalPipe: DecimalPipe
+  decimalPipe: DecimalPipe,
 ): string {
   const exp = Math.floor(Math.log(value) / Math.log(1000));
   const valueInUnit = value / Math.pow(1000, exp);

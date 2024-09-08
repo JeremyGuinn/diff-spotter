@@ -10,15 +10,13 @@ const macOS = navigator.userAgent.includes('Macintosh');
 export class MenuService {
   constructor(
     private themeService: ThemeService,
-    private applicationRef: ApplicationRef
+    private applicationRef: ApplicationRef,
   ) {}
 
   async initMenus(): Promise<void> {
     const menu = await Menu.default();
     const items = await menu.items();
-    const windowMenuIndex = items.findIndex(
-      item => item.id === '__tauri_window_menu__'
-    );
+    const windowMenuIndex = items.findIndex(item => item.id === '__tauri_window_menu__');
 
     const themeSubMenu = await Submenu.new({
       text: 'Theme',

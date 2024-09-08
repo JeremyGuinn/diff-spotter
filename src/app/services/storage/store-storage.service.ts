@@ -2,9 +2,7 @@ import { Store } from '@tauri-apps/plugin-store';
 import { StorageService } from './storage.service';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 
-export const STORE_CONFIGURATION = new InjectionToken<StoreConfiguration>(
-  'STORE_CONFIGURATION'
-);
+export const STORE_CONFIGURATION = new InjectionToken<StoreConfiguration>('STORE_CONFIGURATION');
 
 export interface StoreConfiguration {
   saveOnSet: boolean;
@@ -16,7 +14,7 @@ export class StoreStorageService extends StorageService {
   constructor(
     @Inject(STORE_CONFIGURATION)
     private readonly storeConfiguration: StoreConfiguration,
-    private readonly store: Store
+    private readonly store: Store,
   ) {
     super();
 

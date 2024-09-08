@@ -4,7 +4,7 @@ import { countLinesSpanned } from './strings';
 export function calculateLinesRemovedAndAdded(
   chunks: readonly Chunk[],
   textA: string,
-  textB: string
+  textB: string,
 ): {
   additions: number;
   removals: number;
@@ -18,6 +18,6 @@ export function calculateLinesRemovedAndAdded(
         removals: accumulator.removals + removed,
       };
     },
-    { additions: 0, removals: 0 }
+    { additions: 0, removals: 0 },
   );
 }

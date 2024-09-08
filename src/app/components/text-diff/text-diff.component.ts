@@ -10,12 +10,7 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   remixFileAddLine,
@@ -151,7 +146,7 @@ export class TextDiffComponent {
     map(theme => (theme === 'dark' ? materialDark : materialLight)),
     // Theme changes may occur outside of Angular's zone, due to the menu option, so we need to trigger change detection manually
     tap(() => setTimeout(() => this.changeDetector.detectChanges())),
-    shareReplay(1)
+    shareReplay(1),
   );
 
   diffSettings = new FormGroup({
@@ -178,7 +173,7 @@ export class TextDiffComponent {
 
   diffExtensions = combineLatest({
     editable: this.diffSettings.controls.liveEdit.valueChanges.pipe(
-      startWith(this.diffSettings.controls.liveEdit.value)
+      startWith(this.diffSettings.controls.liveEdit.value),
     ),
     editorTheme: this.editorTheme,
   }).pipe(
@@ -190,15 +185,15 @@ export class TextDiffComponent {
       this.languageConf.of(javascript()),
       this.autoLanguage,
     ]),
-    shareReplay(1)
+    shareReplay(1),
   );
 
   unifiedDiffExtensions = combineLatest({
     collapseLines: this.diffSettings.controls.collapseLines.valueChanges.pipe(
-      startWith(this.diffSettings.controls.collapseLines.value)
+      startWith(this.diffSettings.controls.collapseLines.value),
     ),
     originalValue: this.diffForm.controls.originalText.valueChanges.pipe(
-      startWith(this.diffForm.controls.originalText.value)
+      startWith(this.diffForm.controls.originalText.value),
     ),
   }).pipe(
     map(({ collapseLines }) => [
@@ -209,23 +204,21 @@ export class TextDiffComponent {
         original: this.diffForm.controls.originalText.value,
         mergeControls: false,
         gutter: true,
-        collapseUnchanged: collapseLines
-          ? { margin: 3, minSize: 4 }
-          : undefined,
+        collapseUnchanged: collapseLines ? { margin: 3, minSize: 4 } : undefined,
       }),
-    ])
+    ]),
   );
 
   diffStats = combineLatest({
     view: this.diffMergeView.pipe(
       filter(view => !!view),
-      startWith(null)
+      startWith(null),
     ),
     originalText: this.diffForm.controls.originalText.valueChanges.pipe(
-      startWith(this.diffForm.controls.originalText.value)
+      startWith(this.diffForm.controls.originalText.value),
     ),
     modifiedText: this.diffForm.controls.modifiedText.valueChanges.pipe(
-      startWith(this.diffForm.controls.modifiedText.value)
+      startWith(this.diffForm.controls.modifiedText.value),
     ),
   }).pipe(
     delay(0),
@@ -237,11 +230,7 @@ export class TextDiffComponent {
       const totalModifiedLines = modifiedText.split('\n').length;
 
       const { removals: chunkLinesRemoved, additions: chunkLinesAdded } =
-        calculateLinesRemovedAndAdded(
-          view?.chunks ?? [],
-          originalText,
-          modifiedText
-        );
+        calculateLinesRemovedAndAdded(view?.chunks ?? [], originalText, modifiedText);
 
       return {
         removals: chunkLinesRemoved,
@@ -249,18 +238,16 @@ export class TextDiffComponent {
         totalOriginalLines: totalOriginalLines,
         totalModifiedLines: totalModifiedLines,
       };
-    })
+    }),
   );
 
   constructor() {
-    this.diffForm.valueChanges
-      .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => {
-        this.textsChange.emit({
-          originalText: this.diffForm.value.originalText ?? '',
-          modifiedText: this.diffForm.value.modifiedText ?? '',
-        });
+    this.diffForm.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed()).subscribe(() => {
+      this.textsChange.emit({
+        originalText: this.diffForm.value.originalText ?? '',
+        modifiedText: this.diffForm.value.modifiedText ?? '',
       });
+    });
 
     this.diffSettings.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
@@ -277,7 +264,7 @@ export class TextDiffComponent {
     this.diffSettings.controls.liveEdit.valueChanges
       .pipe(
         takeUntilDestroyed(),
-        filter(liveEdit => !!liveEdit)
+        filter(liveEdit => !!liveEdit),
       )
       .subscribe(() => this.syncDocsWithDiff());
   }
@@ -285,17 +272,14 @@ export class TextDiffComponent {
   @HostListener('dragover', ['$event'])
   @HostListener('drop', ['$event'])
   allowFileDrop(e: DragEvent): void {
-    const editor =
-      e.target instanceof HTMLElement && e.target.closest('app-code-editor');
+    const editor = e.target instanceof HTMLElement && e.target.closest('app-code-editor');
     if (editor) {
       e.preventDefault();
       e.stopPropagation();
 
       const file = e.dataTransfer?.files?.[0];
       if (file) {
-        const controlKey = editor.getAttribute('data-control') as
-          | 'originalText'
-          | 'modifiedText';
+        const controlKey = editor.getAttribute('data-control') as 'originalText' | 'modifiedText';
         this.loadFileText(file, this.diffForm.controls[controlKey]);
       }
     }

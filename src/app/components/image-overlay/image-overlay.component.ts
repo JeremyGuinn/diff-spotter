@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  Input,
-  ViewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { remixExpandLeftRightLine } from '@ng-icons/remixicon';
@@ -24,8 +18,8 @@ import { remixExpandLeftRightLine } from '@ng-icons/remixicon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageOverlayComponent {
-  @Input() image1Src: string = '';
-  @Input() image2Src: string = '';
+  @Input() image1Src = '';
+  @Input() image2Src = '';
 
   @ViewChild('image1') image1!: ElementRef<HTMLImageElement>;
   @ViewChild('image2') image2!: ElementRef<HTMLImageElement>;

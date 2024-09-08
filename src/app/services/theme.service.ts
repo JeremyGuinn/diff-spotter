@@ -1,12 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { PreferencesService } from './preferences.service';
-import {
-  combineLatest,
-  firstValueFrom,
-  map,
-  Observable,
-  startWith,
-} from 'rxjs';
+import { combineLatest, firstValueFrom, map, Observable, startWith } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 
 export type Theme = 'light' | 'dark' | 'system';
@@ -20,13 +14,11 @@ export class ThemeService {
   private readonly THEME_PREFERENCE_KEY = 'theme';
   private readonly document = inject(DOCUMENT);
 
-  constructor(
-    private readonly preferenceService: PreferencesService<ThemeSettings>
-  ) {}
+  constructor(private readonly preferenceService: PreferencesService<ThemeSettings>) {}
 
   public async initializeTheme(): Promise<void> {
     let themePrefs = await firstValueFrom(
-      this.preferenceService.getPreferences(this.THEME_PREFERENCE_KEY)
+      this.preferenceService.getPreferences(this.THEME_PREFERENCE_KEY),
     );
 
     if (!themePrefs) {
@@ -34,10 +26,7 @@ export class ThemeService {
         theme: 'system',
       };
 
-      this.preferenceService.setPreferences(
-        this.THEME_PREFERENCE_KEY,
-        themePrefs
-      );
+      this.preferenceService.setPreferences(this.THEME_PREFERENCE_KEY, themePrefs);
     }
 
     this.setTheme(themePrefs.theme);
@@ -51,7 +40,7 @@ export class ThemeService {
 
     // listen to the user's preference, if changes to 'system' then listen to system theme, otherwise apply the user's preference
     return combineLatest([themePrefs, themeFromSystem]).pipe(
-      map(([theme, systemTheme]) => (theme === 'system' ? systemTheme : theme))
+      map(([theme, systemTheme]) => (theme === 'system' ? systemTheme : theme)),
     );
   }
 
@@ -84,9 +73,7 @@ export class ThemeService {
   }
 
   private matchSystemTheme(): Exclude<Theme, 'system'> {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   private applyTheme(theme: Theme) {

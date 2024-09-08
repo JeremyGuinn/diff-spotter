@@ -2,7 +2,6 @@
 
 <main class="flex-1" *ngIf="activeDiff$ | async as activeDiff">
   @for (diff of diffs | async; track diff.diffId) {
-    <app-diff [class.hidden]="diff.diffId !== activeDiff" [id]="diff.diffId">
-    </app-diff>
+    <app-diff [class.hidden]="diff.diffId !== activeDiff" [id]="diff.diffId"> </app-diff>
   }
 </main>

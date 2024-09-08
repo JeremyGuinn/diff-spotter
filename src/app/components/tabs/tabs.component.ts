@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { DiffsService } from '@app/services/diffs.service';
 import { Diff, DiffMethod } from '@app/services/diffs';
@@ -34,11 +29,8 @@ export class TabsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly diffsService = inject(DiffsService);
 
-  protected readonly tabs: Observable<
-    { title: string; diffId: string; icon: string }[]
-  > = this.diffsService
-    .getOpenDiffs()
-    .pipe(map(this.convertToTabs.bind(this)), shareReplay(1));
+  protected readonly tabs: Observable<{ title: string; diffId: string; icon: string }[]> =
+    this.diffsService.getOpenDiffs().pipe(map(this.convertToTabs.bind(this)), shareReplay(1));
 
   icons = {
     [DiffMethod.NEW]: remixFileLine,
@@ -47,9 +39,7 @@ export class TabsComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.tabs
-      .pipe(take(1))
-      .subscribe(tabs => tabs.length === 0 && this.newDiff());
+    this.tabs.pipe(take(1)).subscribe(tabs => tabs.length === 0 && this.newDiff());
   }
 
   newDiff() {
@@ -78,9 +68,7 @@ export class TabsComponent implements OnInit {
     });
   }
 
-  private convertToTabs(
-    diffs: Diff<unknown>[]
-  ): { title: string; diffId: string; icon: string }[] {
+  private convertToTabs(diffs: Diff<unknown>[]): { title: string; diffId: string; icon: string }[] {
     return diffs.map(diff => ({
       title: diff.title,
       diffId: diff.diffId,

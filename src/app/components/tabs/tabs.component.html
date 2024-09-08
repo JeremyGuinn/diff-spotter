@@ -4,7 +4,8 @@
       [title]="tab.title"
       [link]="['tabs', tab.diffId]"
       [icon]="tab.icon"
-      (tabClose)="closeDiff(tab.diffId, $event)"></app-tab>
+      (tabClose)="closeDiff(tab.diffId, $event)"
+    ></app-tab>
   }
 
   <a
@@ -12,7 +13,8 @@
     class="tab btn btn-square btn-ghost btn-sm"
     tabindex="-1"
     (click)="newDiff()"
-    (keydown.enter)="newDiff()">
+    (keydown.enter)="newDiff()"
+  >
     <ng-icon name="remixAddLine"></ng-icon>
   </a>
 </div>

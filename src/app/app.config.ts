@@ -22,9 +22,7 @@ export const appConfig: ApplicationConfig = {
       provide: ThemeService,
       useFactory: () => {
         const storageService = new LocalStorageService();
-        const preferencesService = new PreferencesService<ThemeSettings>(
-          storageService
-        );
+        const preferencesService = new PreferencesService<ThemeSettings>(storageService);
 
         return new ThemeService(preferencesService);
       },

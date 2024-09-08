@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, signal } from '@angular/core';
 
 @Component({
   selector: 'app-copy-button',
@@ -25,7 +20,9 @@ export class CopyButtonComponent {
   buttonText = signal('Copy');
 
   copyText() {
-    this.text && navigator.clipboard.writeText(this.text);
+    if (this.text) {
+      navigator.clipboard.writeText(this.text);
+    }
 
     this.buttonText.set('Copied!');
     this.disabled.set(true);

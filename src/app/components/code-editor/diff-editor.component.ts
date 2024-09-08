@@ -46,10 +46,7 @@ import { MergeView } from '@codemirror/merge';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiffEditorComponent
-  extends DiffEditor
-  implements OnChanges, OnInit, OnDestroy
-{
+export class DiffEditorComponent extends DiffEditor implements OnChanges, OnInit, OnDestroy {
   @Input() minHeight?: string;
 
   @Output() readonly viewReady = new EventEmitter<MergeView>();
@@ -59,13 +56,9 @@ export class DiffEditorComponent
   }
 
   override ngOnChanges(changes: SimpleChanges): void {
-    const staticSettings = [
-      'originalExtensions',
-      'modifiedExtensions',
-      'setup',
-    ];
+    const staticSettings = ['originalExtensions', 'modifiedExtensions', 'setup'];
     const staticSettingsUpdated = Object.entries(changes).some(
-      ([key, value]) => staticSettings.includes(key) && !value.firstChange
+      ([key, value]) => staticSettings.includes(key) && !value.firstChange,
     );
     if (staticSettingsUpdated) {
       this.ngOnDestroy();
@@ -75,7 +68,7 @@ export class DiffEditorComponent
     if (changes['minHeight']) {
       (this.elementRef.nativeElement as HTMLElement).style.setProperty(
         '--diff-editor-min-height',
-        this.minHeight ?? 'auto'
+        this.minHeight ?? 'auto',
       );
     }
 
