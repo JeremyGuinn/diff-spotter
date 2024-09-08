@@ -2,16 +2,15 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   EventEmitter,
   inject,
   Input,
   Output,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { ImageUploadInputComponent } from '../../components/image/image-upload-input/image-upload-input.component';
 import { ImageUploadPreviewComponent } from '../../components/image/image-upload-preview/image-upload-preview.component';
-import { parse as parseExif } from 'exifr';
 import { ImageOverlayComponent } from '../../components/image/image-overlay/image-overlay.component';
 import { ImageDiff } from '@app/services/diffs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -19,6 +18,7 @@ import {
   remixArrowLeftRightFill,
   remixFileAddLine,
   remixImageFill,
+  remixLoopRightLine,
   remixZoomInFill,
   remixZoomOutFill,
 } from '@ng-icons/remixicon';
@@ -54,6 +54,7 @@ enum DiffMode {
       remixFileAddLine,
       remixZoomOutFill,
       remixZoomInFill,
+      remixLoopRightLine,
     }),
   ],
   templateUrl: './image-diff.component.html',
@@ -62,9 +63,6 @@ enum DiffMode {
 })
 export class ImageDiffComponent {
   private readonly document = inject(DOCUMENT);
-
-  splitZoom = 1;
-  splitPosition?: { x: number; y: number };
 
   @Input() set images(images: ImageDiff['data']) {
     if (!images) return;
@@ -81,63 +79,17 @@ export class ImageDiffComponent {
     modified: File | null;
   }>();
 
+  @ViewChild(SplitImageCanvasComponent) splitImageCanvas!: SplitImageCanvasComponent;
+
   originalFile = signal<File | null>(null);
   modifiedFile = signal<File | null>(null);
 
   originalFileSrc = signal<string>('');
   modifiedFileSrc = signal<string>('');
 
-  original = computed(() => {
-    const file = this.originalFile();
-
-    if (!file) return null;
-
-    const image = new Image();
-    image.src = getImageSrc(file);
-
-    return {
-      src: getImageSrc(file),
-      exif: parseExif(file),
-      file,
-      width: image.width,
-      height: image.height,
-      aspectRatio: image.width / image.height,
-    };
-  });
-
-  modified = computed(() => {
-    const file = this.modifiedFile();
-    if (!file) return null;
-
-    const image = new Image();
-    image.src = getImageSrc(file);
-
-    return {
-      src: getImageSrc(file),
-      exif: parseExif(file),
-      file,
-      width: image.width,
-      height: image.height,
-      aspectRatio: image.width / image.height,
-    };
-  });
-
-  maxHeight = computed(() => {
-    const original = this.original();
-    const modified = this.modified();
-
-    return Math.max(original ? original.height : 0, modified ? modified.height : 0);
-  });
-
-  aspectRatio = computed(() => {
-    const original = this.original();
-    const modified = this.modified();
-
-    return (original ? original.aspectRatio : 1) / (modified ? modified.aspectRatio : 1);
-  });
-
-  mode: DiffMode = DiffMode.fade;
+  mode: DiffMode = DiffMode.split;
   modes = Object.keys(DiffMode) as DiffMode[];
+  splitZoom = 1;
 
   swapImages() {
     const originalFile = this.originalFile();
@@ -189,5 +141,13 @@ export class ImageDiffComponent {
       }
     });
     input.click();
+  }
+
+  reset() {
+    switch (this.mode) {
+      case DiffMode.split:
+        this.splitImageCanvas.reset();
+        break;
+    }
   }
 }

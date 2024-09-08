@@ -5,7 +5,7 @@ import { TextDiffComponent } from './views/text-diff/text-diff.component';
 import { TabsComponent } from './components/tabs/tabs.component';
 import { DiffComponent } from './views/diff/diff.component';
 import { DiffsService } from './services/diffs.service';
-import { filter, map, shareReplay, switchMap } from 'rxjs';
+import { filter, map, shareReplay, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +23,7 @@ export class AppComponent {
 
   activeDiff$ = this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),
+    tap(() => window.history.pushState(null, null!, null)),
     map(() => this.route),
     map(route => {
       let child = route.firstChild;

@@ -11,6 +11,7 @@ import { ThemeService, ThemeSettings } from './services/theme.service';
 import { PreferencesService } from './services/preferences.service';
 import { LocalStorageService } from './services/storage/local-storage.service';
 import { MenuService } from './services/menu.service';
+import { DOCUMENT } from '@angular/common';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,17 @@ export const appConfig: ApplicationConfig = {
         const preferencesService = new PreferencesService<ThemeSettings>(storageService);
 
         return new ThemeService(preferencesService);
+      },
+    },
+
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [DOCUMENT],
+      useFactory: (document: Document) => () => {
+        if (window.location.hostname === 'tauri.localhost') {
+          document.addEventListener('contextmenu', e => e.preventDefault(), { capture: true });
+        }
       },
     },
 

@@ -63,7 +63,7 @@
   </div>
 
   <div class="flex gap-2">
-    <div role="tablist" class="tabs-boxed tabs">
+    <div role="tablist" class="tabs-boxed tabs flex-1">
       @for (option of modes; track $index) {
         <button role="tab" class="tab" [class.tab-active]="option === mode" (click)="mode = option">
           {{ option }}
@@ -86,6 +86,13 @@
         (click)="splitZoom = splitZoom * 2"
       >
         <ng-icon name="remixZoomInFill"></ng-icon>
+      </button>
+    </div>
+
+    <div class="tabs-boxed tabs flex items-center gap-0.5">
+      <button class="btn btn-ghost btn-sm" (click)="reset()">
+        <ng-icon name="remixLoopRightLine"></ng-icon>
+        Reset
       </button>
     </div>
   </div>
