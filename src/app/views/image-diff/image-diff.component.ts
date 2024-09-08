@@ -23,7 +23,6 @@ import {
   remixZoomOutFill,
 } from '@ng-icons/remixicon';
 import { getImageSrc } from '@lib/images';
-import { ImageCanvasComponent } from '../../components/image/image-canvas/image-canvas.component';
 import { SplitImageCanvasComponent } from '../../components/image/split-image-canvas/split-image-canvas.component';
 
 enum DiffMode {
@@ -44,7 +43,6 @@ enum DiffMode {
     ImageUploadPreviewComponent,
     ImageOverlayComponent,
     NgIconComponent,
-    ImageCanvasComponent,
     SplitImageCanvasComponent,
   ],
   providers: [
