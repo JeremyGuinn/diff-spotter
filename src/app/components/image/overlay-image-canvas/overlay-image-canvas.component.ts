@@ -30,8 +30,9 @@ import { remixExpandLeftRightLine } from '@ng-icons/remixicon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OverlayImageCanvasComponent implements AfterViewInit, OnChanges {
-  @Input() baseImageUrl = '';
-  @Input() overlayImageUrl = '';
+  @Input() baseImage!: HTMLImageElement;
+  @Input() overlayImage!: HTMLImageElement;
+
   @Input() zoom = 1;
   @Input() overlayOpacity = 0.5;
 
@@ -41,15 +42,13 @@ export class OverlayImageCanvasComponent implements AfterViewInit, OnChanges {
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
 
   private ctx!: CanvasRenderingContext2D;
-  private baseImage = new Image();
-  private overlayImage = new Image();
   private panX = 0;
   private panY = 0;
 
   ngAfterViewInit() {
     this.ctx = this.canvas.nativeElement.getContext('2d')!;
-    this.loadImages();
     this.updateCanvasSize();
+    this.loadImages();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -60,25 +59,16 @@ export class OverlayImageCanvasComponent implements AfterViewInit, OnChanges {
       this.drawImages();
     }
     if (
-      (changes['baseImageUrl'] && !changes['baseImageUrl'].firstChange) ||
-      (changes['overlayImageUrl'] && !changes['overlayImageUrl'].firstChange)
+      (changes['baseImage'] && !changes['baseImage'].firstChange) ||
+      (changes['overlayImage'] && !changes['overlayImage'].firstChange)
     ) {
       this.loadImages();
     }
   }
 
   loadImages() {
-    this.baseImage.src = this.baseImageUrl;
-    this.overlayImage.src = this.overlayImageUrl;
-
-    this.baseImage.onload = () => {
-      this.centerImageOnCanvas();
-      this.drawImages();
-    };
-
-    this.overlayImage.onload = () => {
-      this.drawImages();
-    };
+    this.centerImageOnCanvas();
+    this.drawImages();
   }
 
   centerImageOnCanvas() {
@@ -169,17 +159,6 @@ export class OverlayImageCanvasComponent implements AfterViewInit, OnChanges {
       canvasElement.width = parentElement.offsetWidth;
       canvasElement.height = parentElement.offsetHeight;
     }
-  }
-
-  onZoom(event: WheelEvent) {
-    const zoomIntensity = 0.1;
-    const zoomDirection = event.deltaY > 0 ? -1 : 1;
-    const newZoom = this.zoom + zoomIntensity * zoomDirection;
-
-    this.zoom = Math.max(0.1, Math.min(newZoom, 3));
-    this.zoomChange.emit(this.zoom);
-    this.centerImageOnCanvas();
-    this.drawImages();
   }
 
   onPan(event: MouseEvent) {

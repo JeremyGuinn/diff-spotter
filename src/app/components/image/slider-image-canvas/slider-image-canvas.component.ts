@@ -13,6 +13,7 @@ import {
   OnChanges,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { getImageElementFromSvg } from '@lib/images';
 import { NgIconComponent } from '@ng-icons/core';
 import { remixExpandLeftRightLine } from '@ng-icons/remixicon';
 
@@ -25,8 +26,8 @@ import { remixExpandLeftRightLine } from '@ng-icons/remixicon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
-  @Input() baseImageUrl = '';
-  @Input() overlayImageUrl = '';
+  @Input() baseImage!: HTMLImageElement;
+  @Input() overlayImage!: HTMLImageElement;
   @Input() zoom = 1;
   @Input() sliderValue = 0.5;
 
@@ -38,8 +39,6 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
   private svgIconImage: HTMLImageElement | null = null;
 
   private ctx!: CanvasRenderingContext2D;
-  private baseImage = new Image();
-  private overlayImage = new Image();
   private panX = 0;
   private panY = 0;
   private startX = 0;
@@ -54,9 +53,9 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
 
   ngAfterViewInit() {
     this.ctx = this.canvas.nativeElement.getContext('2d')!;
+    this.updateCanvasSize();
     this.loadImages();
     this.loadSVGIcon();
-    this.updateCanvasSize();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -69,8 +68,8 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
       this.drawImages();
     }
     if (
-      (changes['baseImageUrl'] && !changes['baseImageUrl'].firstChange) ||
-      (changes['overlayImageUrl'] && !changes['overlayImageUrl'].firstChange)
+      (changes['baseImage'] && !changes['baseImage'].firstChange) ||
+      (changes['overlayImage'] && !changes['overlayImage'].firstChange)
     ) {
       this.loadImages();
     }
@@ -121,31 +120,15 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
   }
 
   loadImages() {
-    this.baseImage.src = this.baseImageUrl;
-    this.overlayImage.src = this.overlayImageUrl;
-
-    this.baseImage.onload = () => {
-      this.centerImageOnCanvas();
-      this.drawImages();
-    };
-
-    this.overlayImage.onload = () => {
-      this.drawImages();
-    };
+    this.centerImageOnCanvas();
+    this.drawImages();
   }
 
   loadSVGIcon() {
-    const svgImage = new Image();
-    const svgBlob = new Blob([remixExpandLeftRightLine], { type: 'image/svg+xml' });
-    const svgURL = URL.createObjectURL(svgBlob);
-
-    svgImage.onload = () => {
-      this.svgIconImage = svgImage;
-      URL.revokeObjectURL(svgURL);
+    getImageElementFromSvg(remixExpandLeftRightLine).then(img => {
+      this.svgIconImage = img;
       this.drawImages();
-    };
-
-    svgImage.src = svgURL;
+    });
   }
 
   updateCanvasSize() {
@@ -164,7 +147,6 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
 
   drawImages() {
     this.clearCanvas();
-    // Draw the base image
     const { drawWidth, drawHeight } = this.drawImageOnCanvas(
       this.baseImage,
       this.sliderValue,
@@ -173,10 +155,8 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
     this.baseDrawWidth = drawWidth;
     this.baseDrawHeight = drawHeight;
 
-    // Draw the overlay image with the same dimensions
     this.drawImageOnCanvas(this.overlayImage, this.sliderValue, true, drawWidth, drawHeight);
 
-    // Draw the slider
     this.drawSlider(drawWidth, drawHeight);
   }
 
@@ -193,11 +173,9 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
       drawWidth = drawHeight * aspectRatio;
     }
 
-    // scale based on zoom
     drawWidth *= this.zoom;
     drawHeight *= this.zoom;
 
-    // Center the image on the canvas
     this.panX = (canvasWidth - drawWidth) / 2;
     this.panY = (canvasHeight - drawHeight) / 2;
   }
@@ -212,11 +190,9 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
     const canvasWidth = this.canvas.nativeElement.width;
     const canvasHeight = this.canvas.nativeElement.height;
 
-    // Calculate the image dimensions based on the canvas size and image aspect ratio
     let drawWidth = baseDrawWidth || canvasWidth;
     let drawHeight = baseDrawHeight || drawWidth / (img.width / img.height);
 
-    // Ensure the image fits within the canvas bounds
     if (drawHeight > canvasHeight) {
       drawHeight = canvasHeight;
       drawWidth = drawHeight * (img.width / img.height);
@@ -226,7 +202,6 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
     this.ctx.scale(this.zoom, this.zoom);
 
     if (isOverlay) {
-      // Clip the overlay image to the right part based on slider value
       this.ctx.globalAlpha = 1;
       this.ctx.beginPath();
       this.ctx.rect(
@@ -237,23 +212,20 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
       );
       this.ctx.clip();
     } else {
-      // Clip the base image to the left part based on slider value
       this.ctx.beginPath();
       this.ctx.rect(this.panX, this.panY, drawWidth * sliderValue, drawHeight);
       this.ctx.clip();
     }
 
-    // Draw the image without any scaling (scaling is applied later)
     this.ctx.drawImage(img, this.panX, this.panY, drawWidth, drawHeight);
     this.ctx.restore();
 
-    return { drawWidth, drawHeight }; // Return dimensions for consistent overlay drawing
+    return { drawWidth, drawHeight };
   }
 
   drawSlider(drawWidth: number, drawHeight: number) {
-    const sliderX = this.panX + drawWidth * this.sliderValue; // Calculate the slider position without zoom
+    const sliderX = this.panX + drawWidth * this.sliderValue;
 
-    // Draw the 1-pixel-wide slider line
     this.ctx.save();
     this.ctx.scale(this.zoom, this.zoom);
     this.ctx.fillStyle = this.sliderColor;
@@ -264,16 +236,14 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
       drawHeight,
     );
 
-    // Draw the circle at the center of the slider
     const circleCenterY = this.panY + drawHeight / 2;
     this.ctx.beginPath();
     this.ctx.arc(sliderX, circleCenterY, this.circleRadius / this.zoom, 0, 2 * Math.PI, false);
     this.ctx.fillStyle = 'white';
     this.ctx.fill();
 
-    // Draw the cached SVG icon inside the circle, if it has been loaded
     if (this.svgIconImage) {
-      const iconSize = this.circleRadius / this.zoom; // Size of the icon
+      const iconSize = this.circleRadius / this.zoom;
       this.ctx.drawImage(
         this.svgIconImage,
         sliderX - iconSize / 2,
@@ -289,46 +259,20 @@ export class SliderImageCanvasComponent implements AfterViewInit, OnChanges {
   updateSliderPosition(mouseX: number) {
     const canvasElement = this.canvas.nativeElement;
     const rect = canvasElement.getBoundingClientRect();
-
-    // Adjust for zoom when calculating the mouse position
     const adjustedMouseX = (mouseX - rect.left) / this.zoom;
 
-    // Calculate slider value relative to the base image's unscaled position
     this.sliderValue = (adjustedMouseX - this.panX) / this.baseDrawWidth;
-    this.sliderValue = Math.max(0, Math.min(1, this.sliderValue)); // Clamp between 0 and 1
+    this.sliderValue = Math.max(0, Math.min(1, this.sliderValue));
 
-    // Redraw the images and slider after updating the position
     this.drawImages();
   }
 
   isOverSlider(mouseX: number): boolean {
     const canvasElement = this.canvas.nativeElement;
     const rect = canvasElement.getBoundingClientRect();
-
-    // Adjust the mouse position to account for the zoom factor
     const adjustedMouseX = (mouseX - rect.left) / this.zoom;
-
-    // Calculate the slider's position on the canvas
     const sliderX = this.panX + this.baseDrawWidth * this.sliderValue;
 
-    console.log(
-      {
-        canvasElement,
-        rect,
-        rectLeft: rect.left,
-        mouseX,
-        adjustedMouseX,
-        sliderX,
-        circleRadius: this.circleRadius,
-        zoom: this.zoom,
-        panX: this.panX,
-        baseDrawWidth: this.baseDrawWidth,
-        sliderValue: this.sliderValue,
-      },
-      Math.abs(adjustedMouseX - sliderX) <= this.circleRadius / this.zoom,
-    );
-
-    // Check if the mouse is within the circle radius of the slider
     return Math.abs(adjustedMouseX - sliderX) <= this.circleRadius / this.zoom;
   }
 }

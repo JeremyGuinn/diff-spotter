@@ -61,7 +61,6 @@ export class DiffComponent {
       .getOpenDiffs()
       .pipe(take(1))
       .subscribe(tabs => {
-        console.log(tabs);
         if (tabs.length === 1) {
           appWindow.close();
           return;
@@ -85,7 +84,6 @@ export class DiffComponent {
   }
 
   updateTextDiffSettings(diff: TextDiff, settings: TextDiffSettings) {
-    console.log(diff, settings);
     this.diffsService.saveDiff({
       ...diff,
       data: {

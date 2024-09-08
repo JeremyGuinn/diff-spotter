@@ -32,8 +32,16 @@
   </div>
 </div>
 
+<!-- show a loading spinner while !originalImage() || !modifiedImage() -->
+<div
+  class="flex size-full items-center justify-center"
+  *ngIf="(!originalImage() || !modifiedImage()) && originalFile() && modifiedFile()"
+>
+  <ng-icon name="remixLoader4Line" class="animate-spin" size="10rem"></ng-icon>
+</div>
+
 <!-- Image diff stage -->
-<div class="flex size-full flex-col gap-2 p-2" *ngIf="modifiedFile() && originalFile()">
+<div class="flex size-full flex-col gap-2 p-2" *ngIf="originalImage() && modifiedImage()">
   <div class="flex justify-between">
     <div class="flex flex-1 gap-2">
       <button class="btn btn-ghost btn-sm flex-1 justify-start" (click)="openFile('original')">
@@ -103,10 +111,10 @@
   </div>
   @switch (mode) {
     @case ('split') {
-      <div class="h-[80dvh] bg-base-200 p-1">
+      <div class="h-full bg-base-200 p-1">
         <app-split-image-canvas
-          [image1Url]="originalFileSrc()"
-          [image2Url]="modifiedFileSrc()"
+          [image1]="originalImage()!"
+          [image2]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         >
         </app-split-image-canvas>
@@ -117,8 +125,8 @@
       <!-- create a slider -->
       <div class="size-full justify-center bg-base-200 p-1">
         <app-overlay-image-canvas
-          [baseImageUrl]="originalFileSrc()"
-          [overlayImageUrl]="modifiedFileSrc()"
+          [baseImage]="originalImage()!"
+          [overlayImage]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         ></app-overlay-image-canvas>
       </div>
@@ -126,21 +134,29 @@
     @case ('slider') {
       <div class="size-full justify-center bg-base-200 p-1">
         <app-slider-image-canvas
-          [baseImageUrl]="originalFileSrc()"
-          [overlayImageUrl]="modifiedFileSrc()"
+          [baseImage]="originalImage()!"
+          [overlayImage]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         ></app-slider-image-canvas>
       </div>
     }
-    @case ('difference') {}
+    @case ('difference') {
+      <div class="size-full justify-center bg-base-200 p-1">
+        <app-image-pixel-difference
+          [baseImage]="originalImage()!"
+          [overlayImage]="modifiedImage()!"
+          [(zoom)]="zoomLevel"
+        ></app-image-pixel-difference>
+      </div>
+    }
     @case ('highlight') {}
     @case ('details') {
       <div class="flex h-fit bg-base-200 p-1">
         <div class="flex flex-col items-center">
-          <img [src]="originalFileSrc()" alt="Original image" class="max-h-52" />
+          <img [src]="originalImage()!.src" alt="Original image" class="max-h-52" />
         </div>
         <div class="flex flex-col items-center">
-          <img [src]="modifiedFileSrc()" alt="Modified image" class="max-h-52" />
+          <img [src]="modifiedImage()!.src" alt="Modified image" class="max-h-52" />
         </div>
       </div>
     }

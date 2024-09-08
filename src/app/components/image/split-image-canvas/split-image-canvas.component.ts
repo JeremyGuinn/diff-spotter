@@ -22,8 +22,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SplitImageCanvasComponent implements AfterViewInit, OnChanges {
-  @Input() image1Url = '';
-  @Input() image2Url = '';
+  @Input() image1!: HTMLImageElement;
+  @Input() image2!: HTMLImageElement;
   @Input() zoom = 1;
   @Output() zoomChange: EventEmitter<number> = new EventEmitter<number>();
 
@@ -32,16 +32,14 @@ export class SplitImageCanvasComponent implements AfterViewInit, OnChanges {
 
   private ctx1!: CanvasRenderingContext2D;
   private ctx2!: CanvasRenderingContext2D;
-  private image1 = new Image();
-  private image2 = new Image();
   private panX = 0;
   private panY = 0;
 
   ngAfterViewInit() {
     this.ctx1 = this.canvas1.nativeElement.getContext('2d')!;
     this.ctx2 = this.canvas2.nativeElement.getContext('2d')!;
-    this.loadImages();
     this.updateCanvasSize();
+    this.loadImages();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -51,25 +49,16 @@ export class SplitImageCanvasComponent implements AfterViewInit, OnChanges {
     }
 
     if (
-      (changes['image1Url'] && !changes['image1Url'].firstChange) ||
-      (changes['image2Url'] && !changes['image2Url'].firstChange)
+      (changes['image1'] && !changes['image1'].firstChange) ||
+      (changes['image2'] && !changes['image2'].firstChange)
     ) {
       this.loadImages();
     }
   }
 
   loadImages() {
-    this.image1.src = this.image1Url;
-    this.image2.src = this.image2Url;
-
-    this.image1.onload = () => {
-      this.centerImages();
-      this.drawImages();
-    };
-    this.image2.onload = () => {
-      this.centerImages();
-      this.drawImages();
-    };
+    this.centerImages();
+    this.drawImages();
   }
 
   centerImages() {

@@ -17,14 +17,17 @@ import {
   remixArrowLeftRightFill,
   remixFileAddLine,
   remixImageFill,
+  remixLoader4Line,
   remixLoopRightLine,
   remixZoomInFill,
   remixZoomOutFill,
 } from '@ng-icons/remixicon';
-import { getImageSrc } from '@lib/images';
+import { getImageElementFromUrl, getImageSrc } from '@lib/images';
 import { SplitImageCanvasComponent } from '../../components/image/split-image-canvas/split-image-canvas.component';
 import { OverlayImageCanvasComponent } from '../../components/image/overlay-image-canvas/overlay-image-canvas.component';
 import { SliderImageCanvasComponent } from '../../components/image/slider-image-canvas/slider-image-canvas.component';
+import { ImagePixelDifferenceComponent } from '../../components/image/image-pixel-difference/image-pixel-difference.component';
+import { derivedAsync } from 'ngxtension/derived-async';
 
 enum DiffMode {
   'split' = 'split',
@@ -46,6 +49,7 @@ enum DiffMode {
     SplitImageCanvasComponent,
     OverlayImageCanvasComponent,
     SliderImageCanvasComponent,
+    ImagePixelDifferenceComponent,
   ],
   providers: [
     provideIcons({
@@ -55,6 +59,7 @@ enum DiffMode {
       remixZoomOutFill,
       remixZoomInFill,
       remixLoopRightLine,
+      remixLoader4Line,
     }),
   ],
   templateUrl: './image-diff.component.html',
@@ -69,9 +74,6 @@ export class ImageDiffComponent {
 
     this.originalFile.set(images.originalFile);
     this.modifiedFile.set(images.modifiedFile);
-
-    this.originalFileSrc.set(images.originalSrc || getImageSrc(images.originalFile));
-    this.modifiedFileSrc.set(images.modifiedSrc || getImageSrc(images.modifiedFile));
   }
 
   @Output() imagesChange = new EventEmitter<{
@@ -82,12 +84,20 @@ export class ImageDiffComponent {
   @ViewChild(SplitImageCanvasComponent) splitImageCanvas!: SplitImageCanvasComponent;
   @ViewChild(OverlayImageCanvasComponent) overlayImageCanvas!: OverlayImageCanvasComponent;
   @ViewChild(SliderImageCanvasComponent) sliderImageCanvas!: SliderImageCanvasComponent;
+  @ViewChild(ImagePixelDifferenceComponent) imagePixelDifference!: ImagePixelDifferenceComponent;
 
   originalFile = signal<File | null>(null);
   modifiedFile = signal<File | null>(null);
 
-  originalFileSrc = signal<string>('');
-  modifiedFileSrc = signal<string>('');
+  originalImage = derivedAsync(() => {
+    const file = this.originalFile();
+    return file ? getImageElementFromUrl(getImageSrc(file)) : null;
+  });
+
+  modifiedImage = derivedAsync(() => {
+    const file = this.modifiedFile();
+    return file ? getImageElementFromUrl(getImageSrc(file)) : null;
+  });
 
   mode: DiffMode = DiffMode.split;
   modes = Object.keys(DiffMode) as DiffMode[];
@@ -100,15 +110,10 @@ export class ImageDiffComponent {
 
   swapImages() {
     const originalFile = this.originalFile();
-    const originalSrc = this.originalFileSrc();
     const modifiedFile = this.modifiedFile();
-    const modifiedSrc = this.modifiedFileSrc();
 
     this.originalFile.set(modifiedFile);
     this.modifiedFile.set(originalFile);
-
-    this.originalFileSrc.set(modifiedSrc);
-    this.modifiedFileSrc.set(originalSrc);
 
     this.imagesChange.emit({
       original: modifiedFile,
@@ -161,6 +166,8 @@ export class ImageDiffComponent {
       case DiffMode.slider:
         this.sliderImageCanvas.reset();
         break;
+      case DiffMode.difference:
+        this.imagePixelDifference.reset();
     }
   }
 }
