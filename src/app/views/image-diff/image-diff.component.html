@@ -33,7 +33,7 @@
 </div>
 
 <!-- Image diff stage -->
-<div class="mt-2 flex size-full flex-col gap-2 p-2" *ngIf="modifiedFile() && originalFile()">
+<div class="flex size-full flex-col gap-2 p-2" *ngIf="modifiedFile() && originalFile()">
   <div class="flex justify-between">
     <div class="flex flex-1 gap-2">
       <button class="btn btn-ghost btn-sm flex-1 justify-start" (click)="openFile('original')">

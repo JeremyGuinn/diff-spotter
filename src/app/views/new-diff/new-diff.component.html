@@ -2,16 +2,66 @@
   <h1 class="mb-8 text-4xl font-bold">Create new diff</h1>
   <div class="flex space-x-4">
     <button
-      class="btn btn-square btn-accent size-32 rounded px-4 py-2 text-white"
+      class="btn btn-square btn-ghost flex size-64 flex-col items-center justify-center rounded-lg px-4 py-2"
       (click)="methodSelect.emit(DiffMethod.TEXT)"
     >
-      Text
+      <div class="relative size-24">
+        <ng-icon
+          name="remixFileFill"
+          size="6rem"
+          style="
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            mask-image: linear-gradient(-90deg, black, transparent);
+          "
+          color="oklch(var(--p))"
+        ></ng-icon>
+        <ng-icon
+          name="remixFileFill"
+          size="6rem"
+          style="
+            position: absolute;
+            top: 0.5rem;
+            left: -1rem;
+            mask-image: linear-gradient(-90deg, black, transparent);
+          "
+          color="oklch(var(--p))"
+        ></ng-icon>
+      </div>
+      <span class="text-lg font-bold">Text</span>
+      <span class>Plain text files</span>
     </button>
     <button
-      class="btn btn-square btn-secondary size-32 rounded px-4 py-2 text-white"
+      class="btn btn-square btn-ghost flex size-64 flex-col items-center justify-center rounded-lg px-4 py-2"
       (click)="methodSelect.emit(DiffMethod.IMAGE)"
     >
-      Images
+      <div class="relative size-24">
+        <ng-icon
+          name="remixImageFill"
+          size="6rem"
+          style="
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            mask-image: linear-gradient(-90deg, black, transparent);
+          "
+          color="oklch(var(--s))"
+        ></ng-icon>
+        <ng-icon
+          name="remixImageFill"
+          size="6rem"
+          style="
+            position: absolute;
+            top: 0.5rem;
+            left: -1rem;
+            mask-image: linear-gradient(-90deg, black, transparent);
+          "
+          color="oklch(var(--s))"
+        ></ng-icon>
+      </div>
+      <span class="text-lg font-bold">Images</span>
+      <span class>Photos, graphics, etc</span>
     </button>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<div *ngIf="diff$ | async as diff" class="h-full overflow-y-auto">
+<div *ngIf="diff$ | async as diff" class="h-full">
   @switch (diff.method) {
     @case ('TEXT') {
       <app-text-diff
