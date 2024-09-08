@@ -2,103 +2,109 @@
 
 <div
   class="flex size-full items-center justify-center gap-8 p-2"
-  *ngIf="!modifiedFile() || !originalFile()">
+  *ngIf="!modifiedFile() || !originalFile()"
+>
   <div class="size-full">
     <app-image-upload-input
       *ngIf="!originalFile()"
       (fileUpload)="handleFileUpload($event, true)"
-      class="mb-4"></app-image-upload-input>
+      class="mb-4"
+    ></app-image-upload-input>
 
     <app-image-upload-preview
       *ngIf="originalFile() as file"
       [file]="file"
-      (remove)="handleFileRemove(true)"></app-image-upload-preview>
+      (remove)="handleFileRemove(true)"
+    ></app-image-upload-preview>
   </div>
   <div class="size-full">
     <app-image-upload-input
       *ngIf="!modifiedFile()"
       (fileUpload)="handleFileUpload($event, false)"
-      class="mb-4"></app-image-upload-input>
+      class="mb-4"
+    ></app-image-upload-input>
 
     <app-image-upload-preview
       *ngIf="modifiedFile() as file"
       [file]="file"
-      (remove)="handleFileRemove(false)"></app-image-upload-preview>
+      (remove)="handleFileRemove(false)"
+    ></app-image-upload-preview>
   </div>
 </div>
 
 <!-- Image diff stage -->
-<div
-  class="mt-2 flex size-full flex-col gap-2 p-2"
-  *ngIf="modifiedFile() && originalFile()">
+<div class="mt-2 flex size-full flex-col gap-2 p-2" *ngIf="modifiedFile() && originalFile()">
   <div class="flex justify-between">
     <div class="flex flex-1 gap-2">
-      <button
-        class="btn btn-ghost btn-sm flex-1 justify-start"
-        (click)="openFile('original')">
+      <button class="btn btn-ghost btn-sm flex-1 justify-start" (click)="openFile('original')">
         <ng-icon name="remixImageFill"></ng-icon>
         <span>{{ originalFile()?.name }}</span>
       </button>
-      <button
-        class="btn btn-ghost btn-primary btn-sm"
-        (click)="openFile('original')">
+      <button class="btn btn-ghost btn-primary btn-sm" (click)="openFile('original')">
         <ng-icon name="remixFileAddLine"></ng-icon>
         Open file
       </button>
     </div>
     <div>
-      <button
-        class="btn btn-square btn-ghost btn-sm print:hidden"
-        (click)="swapImages()">
+      <button class="btn btn-square btn-ghost btn-sm print:hidden" (click)="swapImages()">
         <ng-icon name="remixArrowLeftRightFill"></ng-icon>
       </button>
     </div>
     <div class="flex flex-1 gap-2">
-      <button
-        class="btn btn-ghost btn-sm flex-1 justify-start"
-        (click)="openFile('modified')">
+      <button class="btn btn-ghost btn-sm flex-1 justify-start" (click)="openFile('modified')">
         <ng-icon name="remixImageFill"></ng-icon>
         <span>{{ modifiedFile()?.name }}</span>
       </button>
-      <button
-        class="btn btn-ghost btn-primary btn-sm"
-        (click)="openFile('modified')">
+      <button class="btn btn-ghost btn-primary btn-sm" (click)="openFile('modified')">
         <ng-icon name="remixFileAddLine"></ng-icon>
         Open file
       </button>
     </div>
   </div>
 
-  <div role="tablist" class="tabs-boxed tabs">
-    @for (option of modes; track $index) {
-      <button
-        role="tab"
-        class="tab"
-        [class.tab-active]="option === mode"
-        (click)="mode = option">
-        {{ option }}
-      </button>
-    }
-  </div>
+  <div class="flex gap-2">
+    <div role="tablist" class="tabs-boxed tabs">
+      @for (option of modes; track $index) {
+        <button role="tab" class="tab" [class.tab-active]="option === mode" (click)="mode = option">
+          {{ option }}
+        </button>
+      }
+    </div>
 
+    <div class="tabs-boxed tabs flex items-center gap-0.5">
+      <button
+        role="button"
+        class="btn btn-square btn-ghost btn-sm"
+        (click)="splitZoom = splitZoom / 2"
+      >
+        <ng-icon name="remixZoomOutFill"></ng-icon>
+      </button>
+      <span>{{ splitZoom * 100 | number: '1.0-0' }}%</span>
+      <button
+        role="button"
+        class="btn btn-square btn-ghost btn-sm"
+        (click)="splitZoom = splitZoom * 2"
+      >
+        <ng-icon name="remixZoomInFill"></ng-icon>
+      </button>
+    </div>
+  </div>
   @switch (mode) {
     @case ('split') {
-      <div class="flex h-fit bg-base-200 p-1">
-        <div class="flex flex-1 items-start justify-center">
-          <img [src]="originalFileSrc()" alt="Original image" class="" />
-        </div>
-        <div class="flex flex-1 items-start justify-center">
-          <img [src]="modifiedFileSrc()" alt="Modified image" class="" />
-        </div>
+      <div class="h-[80dvh] bg-base-200 p-1">
+        <app-split-image-canvas
+          [image1Url]="originalFileSrc()"
+          [image2Url]="modifiedFileSrc()"
+          [(zoom)]="splitZoom"
+        >
+        </app-split-image-canvas>
       </div>
     }
     @case ('fade') {
       <!-- overlay the two images on each other -->
       <!-- create a slider -->
       <div class="flex h-fit justify-center bg-base-200 p-1">
-        <app-image-overlay
-          [image1Src]="originalFileSrc()"
-          [image2Src]="modifiedFileSrc()">
+        <app-image-overlay [image1Src]="originalFileSrc()" [image2Src]="modifiedFileSrc()">
         </app-image-overlay>
       </div>
     }
@@ -118,16 +124,10 @@
     @case ('details') {
       <div class="flex h-fit bg-base-200 p-1">
         <div class="flex flex-col items-center">
-          <img
-            [src]="originalFileSrc()"
-            alt="Original image"
-            class="max-h-52" />
+          <img [src]="originalFileSrc()" alt="Original image" class="max-h-52" />
         </div>
         <div class="flex flex-col items-center">
-          <img
-            [src]="modifiedFileSrc()"
-            alt="Modified image"
-            class="max-h-52" />
+          <img [src]="modifiedFileSrc()" alt="Modified image" class="max-h-52" />
         </div>
       </div>
     }

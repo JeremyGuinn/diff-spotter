@@ -2,7 +2,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { remixCloseLine, remixImageFill } from '@ng-icons/remixicon';
-import { BytesPipe } from '../../pipes/bytes.pipe';
+import { BytesPipe } from '../../../pipes/bytes.pipe';
 
 @Component({
   selector: 'app-image-upload-preview[file]',

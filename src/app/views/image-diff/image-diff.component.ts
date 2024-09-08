@@ -9,18 +9,22 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { ImageUploadInputComponent } from '../image-upload-input/image-upload-input.component';
-import { ImageUploadPreviewComponent } from '../image-upload-preview/image-upload-preview.component';
+import { ImageUploadInputComponent } from '../../components/image/image-upload-input/image-upload-input.component';
+import { ImageUploadPreviewComponent } from '../../components/image/image-upload-preview/image-upload-preview.component';
 import { parse as parseExif } from 'exifr';
-import { ImageOverlayComponent } from '../image-overlay/image-overlay.component';
+import { ImageOverlayComponent } from '../../components/image/image-overlay/image-overlay.component';
 import { ImageDiff } from '@app/services/diffs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   remixArrowLeftRightFill,
   remixFileAddLine,
   remixImageFill,
+  remixZoomInFill,
+  remixZoomOutFill,
 } from '@ng-icons/remixicon';
 import { getImageSrc } from '@lib/images';
+import { ImageCanvasComponent } from '../../components/image/image-canvas/image-canvas.component';
+import { SplitImageCanvasComponent } from '../../components/image/split-image-canvas/split-image-canvas.component';
 
 enum DiffMode {
   'split' = 'split',
@@ -40,12 +44,16 @@ enum DiffMode {
     ImageUploadPreviewComponent,
     ImageOverlayComponent,
     NgIconComponent,
+    ImageCanvasComponent,
+    SplitImageCanvasComponent,
   ],
   providers: [
     provideIcons({
       remixArrowLeftRightFill,
       remixImageFill,
       remixFileAddLine,
+      remixZoomOutFill,
+      remixZoomInFill,
     }),
   ],
   templateUrl: './image-diff.component.html',
@@ -55,18 +63,17 @@ enum DiffMode {
 export class ImageDiffComponent {
   private readonly document = inject(DOCUMENT);
 
+  splitZoom = 1;
+  splitPosition?: { x: number; y: number };
+
   @Input() set images(images: ImageDiff['data']) {
     if (!images) return;
 
     this.originalFile.set(images.originalFile);
     this.modifiedFile.set(images.modifiedFile);
 
-    this.originalFileSrc.set(
-      images.originalSrc || getImageSrc(images.originalFile)
-    );
-    this.modifiedFileSrc.set(
-      images.modifiedSrc || getImageSrc(images.modifiedFile)
-    );
+    this.originalFileSrc.set(images.originalSrc || getImageSrc(images.originalFile));
+    this.modifiedFileSrc.set(images.modifiedSrc || getImageSrc(images.modifiedFile));
   }
 
   @Output() imagesChange = new EventEmitter<{
@@ -119,20 +126,14 @@ export class ImageDiffComponent {
     const original = this.original();
     const modified = this.modified();
 
-    return Math.max(
-      original ? original.height : 0,
-      modified ? modified.height : 0
-    );
+    return Math.max(original ? original.height : 0, modified ? modified.height : 0);
   });
 
   aspectRatio = computed(() => {
     const original = this.original();
     const modified = this.modified();
 
-    return (
-      (original ? original.aspectRatio : 1) /
-      (modified ? modified.aspectRatio : 1)
-    );
+    return (original ? original.aspectRatio : 1) / (modified ? modified.aspectRatio : 1);
   });
 
   mode: DiffMode = DiffMode.fade;

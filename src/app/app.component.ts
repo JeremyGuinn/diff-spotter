@@ -1,27 +1,16 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
-import { TextDiffComponent } from './components/text-diff/text-diff.component';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { TextDiffComponent } from './views/text-diff/text-diff.component';
 import { TabsComponent } from './components/tabs/tabs.component';
-import { DiffComponent } from './components/diff/diff.component';
+import { DiffComponent } from './views/diff/diff.component';
 import { DiffsService } from './services/diffs.service';
 import { filter, map, shareReplay, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    TextDiffComponent,
-    TabsComponent,
-    DiffComponent,
-  ],
+  imports: [CommonModule, RouterOutlet, TextDiffComponent, TabsComponent, DiffComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -45,7 +34,7 @@ export class AppComponent {
     }),
     switchMap(route => route.params),
     map(params => params['id']),
-    shareReplay(1)
+    shareReplay(1),
   );
 
   @HostListener('window:dragover', ['$event'])

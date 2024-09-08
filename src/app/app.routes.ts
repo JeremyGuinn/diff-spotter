@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DiffComponent } from './components/diff/diff.component';
+import { DiffComponent } from './views/diff/diff.component';
 
 export const routes: Routes = [
   {

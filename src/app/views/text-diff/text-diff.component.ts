@@ -40,11 +40,11 @@ import {
   startWith,
   tap,
 } from 'rxjs';
-import { CodeEditorComponent } from '../code-editor/code-editor.component';
-import { DiffEditorComponent } from '../code-editor/diff-editor.component';
+import { CodeEditorComponent } from '../../components/code-editor/code-editor.component';
+import { DiffEditorComponent } from '../../components/code-editor/diff-editor.component';
 import { MergeView, unifiedMergeView } from '@codemirror/merge';
 import { calculateLinesRemovedAndAdded } from '@lib/diffs';
-import { CopyButtonComponent } from '../copy-button/copy-button.component';
+import { CopyButtonComponent } from '../../components/copy-button/copy-button.component';
 
 import { language } from '@codemirror/language';
 import { languages } from '@codemirror/language-data';

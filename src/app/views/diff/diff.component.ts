@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { ImageDiffComponent } from '../image-diff/image-diff.component';
 import { getImageSrc } from '@lib/images';
+import { ImageCanvasComponent } from '../../components/image/image-canvas/image-canvas.component';
 
 const appWindow = getCurrentWindow();
 
@@ -20,6 +21,7 @@ const appWindow = getCurrentWindow();
     NewDiffComponent,
     TextDiffComponent,
     ImageDiffComponent,
+    ImageCanvasComponent,
   ],
   templateUrl: './diff.component.html',
   styleUrl: './diff.component.scss',
