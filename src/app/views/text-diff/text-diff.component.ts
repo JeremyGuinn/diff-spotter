@@ -374,9 +374,6 @@ export class TextDiffComponent {
     const originalText = this.diffForm.controls.originalText.value;
     const modifiedText = this.diffForm.controls.modifiedText.value;
 
-    // remove duplicate line breaks, but keep single line breaks
-    // remove duplicate spaces, but keep single spaces, unless it's at the beginning or end of a line
-
     this.diffForm.patchValue({
       originalText: cleanMultilineString(originalText),
       modifiedText: cleanMultilineString(modifiedText),

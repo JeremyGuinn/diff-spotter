@@ -1,0 +1,22 @@
+<div class="flex size-full flex-col items-center">
+  <div class="relative top-5 flex w-3/4">
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      class="slider cursor-pointer"
+      [(ngModel)]="overlayOpacity"
+      (input)="onOpacityChange($event)"
+      #slider
+    />
+    <div
+      class="pointer-events-none absolute left-0 top-0 flex size-8 select-none items-center justify-center text-center"
+      [style.left.%]="overlayOpacity * 100"
+      [style.transform]="'translate(-' + overlayOpacity * 100 + '%, -50%)'"
+    >
+      <ng-icon name="remixExpandLeftRightLine"></ng-icon>
+    </div>
+  </div>
+  <canvas #canvas (mousemove)="onPan($event)" class="size-full flex-1 cursor-pointer"></canvas>
+</div>

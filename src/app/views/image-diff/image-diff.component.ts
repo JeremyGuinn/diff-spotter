@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { ImageUploadInputComponent } from '../../components/image/image-upload-input/image-upload-input.component';
 import { ImageUploadPreviewComponent } from '../../components/image/image-upload-preview/image-upload-preview.component';
-import { ImageOverlayComponent } from '../../components/image/image-overlay/image-overlay.component';
 import { ImageDiff } from '@app/services/diffs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -24,6 +23,8 @@ import {
 } from '@ng-icons/remixicon';
 import { getImageSrc } from '@lib/images';
 import { SplitImageCanvasComponent } from '../../components/image/split-image-canvas/split-image-canvas.component';
+import { OverlayImageCanvasComponent } from '../../components/image/overlay-image-canvas/overlay-image-canvas.component';
+import { SliderImageCanvasComponent } from '../../components/image/slider-image-canvas/slider-image-canvas.component';
 
 enum DiffMode {
   'split' = 'split',
@@ -41,9 +42,10 @@ enum DiffMode {
     CommonModule,
     ImageUploadInputComponent,
     ImageUploadPreviewComponent,
-    ImageOverlayComponent,
     NgIconComponent,
     SplitImageCanvasComponent,
+    OverlayImageCanvasComponent,
+    SliderImageCanvasComponent,
   ],
   providers: [
     provideIcons({
@@ -78,6 +80,8 @@ export class ImageDiffComponent {
   }>();
 
   @ViewChild(SplitImageCanvasComponent) splitImageCanvas!: SplitImageCanvasComponent;
+  @ViewChild(OverlayImageCanvasComponent) overlayImageCanvas!: OverlayImageCanvasComponent;
+  @ViewChild(SliderImageCanvasComponent) sliderImageCanvas!: SliderImageCanvasComponent;
 
   originalFile = signal<File | null>(null);
   modifiedFile = signal<File | null>(null);
@@ -87,7 +91,12 @@ export class ImageDiffComponent {
 
   mode: DiffMode = DiffMode.split;
   modes = Object.keys(DiffMode) as DiffMode[];
-  splitZoom = 1;
+  zoomLevel = 1;
+
+  setMode(mode: DiffMode) {
+    this.mode = mode;
+    this.zoomLevel = 1;
+  }
 
   swapImages() {
     const originalFile = this.originalFile();
@@ -145,6 +154,12 @@ export class ImageDiffComponent {
     switch (this.mode) {
       case DiffMode.split:
         this.splitImageCanvas.reset();
+        break;
+      case DiffMode.fade:
+        this.overlayImageCanvas.reset();
+        break;
+      case DiffMode.slider:
+        this.sliderImageCanvas.reset();
         break;
     }
   }

@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TextDiffComponent } from './views/text-diff/text-diff.component';
@@ -13,6 +13,7 @@ import { filter, map, shareReplay, switchMap, tap } from 'rxjs';
   imports: [CommonModule, RouterOutlet, TextDiffComponent, TabsComponent, DiffComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   private readonly diffsService = inject(DiffsService);

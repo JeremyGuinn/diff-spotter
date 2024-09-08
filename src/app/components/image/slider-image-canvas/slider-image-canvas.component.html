@@ -1,0 +1,9 @@
+<div class="flex size-full flex-col items-center">
+  <canvas
+    #canvas
+    (mousemove)="onPan($event)"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp()"
+    class="size-full flex-1 cursor-pointer"
+  ></canvas>
+</div>

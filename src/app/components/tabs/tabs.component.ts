@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { DiffsService } from '@app/services/diffs.service';
 import { Diff, DiffMethod } from '@app/services/diffs';
@@ -40,6 +40,13 @@ export class TabsComponent implements OnInit {
 
   ngOnInit(): void {
     this.tabs.pipe(take(1)).subscribe(tabs => tabs.length === 0 && this.newDiff());
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent) {
+    if (event.key === 't' && event.ctrlKey) {
+      this.newDiff();
+    }
   }
 
   newDiff() {

@@ -32,8 +32,11 @@ export class DiffComponent {
 
   @HostListener('window:keydown', ['$event'])
   handleKeydown(event: KeyboardEvent) {
+    if (event.defaultPrevented) return;
+
     if (event.key === 'w' && event.ctrlKey) {
       this.closeDiff(this.id$.value);
+      event.preventDefault();
     }
   }
 
@@ -58,6 +61,7 @@ export class DiffComponent {
       .getOpenDiffs()
       .pipe(take(1))
       .subscribe(tabs => {
+        console.log(tabs);
         if (tabs.length === 1) {
           appWindow.close();
           return;

@@ -65,7 +65,12 @@
   <div class="flex gap-2">
     <div role="tablist" class="tabs-boxed tabs flex-1">
       @for (option of modes; track $index) {
-        <button role="tab" class="tab" [class.tab-active]="option === mode" (click)="mode = option">
+        <button
+          role="tab"
+          class="tab"
+          [class.tab-active]="option === mode"
+          (click)="setMode(option)"
+        >
           {{ option }}
         </button>
       }
@@ -75,15 +80,15 @@
       <button
         role="button"
         class="btn btn-square btn-ghost btn-sm"
-        (click)="splitZoom = splitZoom / 2"
+        (click)="zoomLevel = zoomLevel / 2"
       >
         <ng-icon name="remixZoomOutFill"></ng-icon>
       </button>
-      <span>{{ splitZoom * 100 | number: '1.0-0' }}%</span>
+      <span>{{ zoomLevel * 100 | number: '1.0-0' }}%</span>
       <button
         role="button"
         class="btn btn-square btn-ghost btn-sm"
-        (click)="splitZoom = splitZoom * 2"
+        (click)="zoomLevel = zoomLevel * 2"
       >
         <ng-icon name="remixZoomInFill"></ng-icon>
       </button>
@@ -102,7 +107,7 @@
         <app-split-image-canvas
           [image1Url]="originalFileSrc()"
           [image2Url]="modifiedFileSrc()"
-          [(zoom)]="splitZoom"
+          [(zoom)]="zoomLevel"
         >
         </app-split-image-canvas>
       </div>
@@ -110,20 +115,21 @@
     @case ('fade') {
       <!-- overlay the two images on each other -->
       <!-- create a slider -->
-      <div class="flex h-fit justify-center bg-base-200 p-1">
-        <app-image-overlay [image1Src]="originalFileSrc()" [image2Src]="modifiedFileSrc()">
-        </app-image-overlay>
+      <div class="size-full justify-center bg-base-200 p-1">
+        <app-overlay-image-canvas
+          [baseImageUrl]="originalFileSrc()"
+          [overlayImageUrl]="modifiedFileSrc()"
+          [(zoom)]="zoomLevel"
+        ></app-overlay-image-canvas>
       </div>
     }
     @case ('slider') {
-      <div class="diff">
-        <div class="diff-item-1">
-          <img [src]="originalFileSrc()" alt="Original image" class="" />
-        </div>
-        <div class="diff-item-2">
-          <img [src]="modifiedFileSrc()" alt="Modified image" class="" />
-        </div>
-        <div class="diff-resizer"></div>
+      <div class="size-full justify-center bg-base-200 p-1">
+        <app-slider-image-canvas
+          [baseImageUrl]="originalFileSrc()"
+          [overlayImageUrl]="modifiedFileSrc()"
+          [(zoom)]="zoomLevel"
+        ></app-slider-image-canvas>
       </div>
     }
     @case ('difference') {}
