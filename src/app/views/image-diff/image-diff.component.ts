@@ -15,6 +15,7 @@ import { ImageDiff } from '@app/services/diffs';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   remixArrowLeftRightFill,
+  remixDownload2Line,
   remixFileAddLine,
   remixImageFill,
   remixLoader4Line,
@@ -28,6 +29,9 @@ import { OverlayImageCanvasComponent } from '../../components/image/overlay-imag
 import { SliderImageCanvasComponent } from '../../components/image/slider-image-canvas/slider-image-canvas.component';
 import { ImagePixelDifferenceComponent } from '../../components/image/image-pixel-difference/image-pixel-difference.component';
 import { derivedAsync } from 'ngxtension/derived-async';
+import { ImageHighlightDifferenceComponent } from '../../components/image/image-highlight-difference/image-highlight-difference.component';
+import { save as saveDialog } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '@tauri-apps/plugin-fs';
 
 enum DiffMode {
   'split' = 'split',
@@ -50,6 +54,7 @@ enum DiffMode {
     OverlayImageCanvasComponent,
     SliderImageCanvasComponent,
     ImagePixelDifferenceComponent,
+    ImageHighlightDifferenceComponent,
   ],
   providers: [
     provideIcons({
@@ -60,6 +65,7 @@ enum DiffMode {
       remixZoomInFill,
       remixLoopRightLine,
       remixLoader4Line,
+      remixDownload2Line,
     }),
   ],
   templateUrl: './image-diff.component.html',
@@ -86,6 +92,8 @@ export class ImageDiffComponent {
   @ViewChild(SliderImageCanvasComponent) sliderImageCanvas!: SliderImageCanvasComponent;
   @ViewChild(ImagePixelDifferenceComponent) imagePixelDifference!: ImagePixelDifferenceComponent;
 
+  highlightDiffImage = signal<HTMLImageElement | null>(null);
+
   originalFile = signal<File | null>(null);
   modifiedFile = signal<File | null>(null);
 
@@ -104,8 +112,29 @@ export class ImageDiffComponent {
   zoomLevel = 1;
 
   setMode(mode: DiffMode) {
+    if (this.mode === mode) return;
+
     this.mode = mode;
     this.zoomLevel = 1;
+    this.highlightDiffImage.set(null);
+  }
+
+  saveHighlightDiff() {
+    saveDialog({
+      defaultPath: 'highlight-diff.png',
+      filters: [{ name: 'Images', extensions: ['png'] }],
+    }).then(result => {
+      if (result) {
+        const src = this.highlightDiffImage()?.src;
+        if (!src) return;
+
+        fetch(src)
+          .then(response => response.arrayBuffer())
+          .then(arrayBuffer => new Uint8Array(arrayBuffer))
+          .then(buffer => writeFile(result, buffer))
+          .catch(console.error);
+      }
+    });
   }
 
   swapImages() {

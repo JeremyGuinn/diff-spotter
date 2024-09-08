@@ -108,6 +108,13 @@
         Reset
       </button>
     </div>
+
+    <div class="tabs-boxed tabs flex items-center gap-0.5" *ngIf="highlightDiffImage()">
+      <button class="btn btn-ghost btn-sm" (click)="saveHighlightDiff()">
+        <ng-icon name="remixDownload2Line"></ng-icon>
+        Download
+      </button>
+    </div>
   </div>
   @switch (mode) {
     @case ('split') {
@@ -149,7 +156,16 @@
         ></app-image-pixel-difference>
       </div>
     }
-    @case ('highlight') {}
+    @case ('highlight') {
+      <div class="size-full justify-center bg-base-200 p-1">
+        <app-image-highlight-difference
+          [baseImage]="originalImage()!"
+          [overlayImage]="modifiedImage()!"
+          (diffChange)="highlightDiffImage.set($event)"
+          [(zoom)]="zoomLevel"
+        ></app-image-highlight-difference>
+      </div>
+    }
     @case ('details') {
       <div class="flex h-fit bg-base-200 p-1">
         <div class="flex flex-col items-center">
