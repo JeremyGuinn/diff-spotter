@@ -29,6 +29,8 @@
         "title": "Diffspotter",
         "width": 1600,
         "height": 900,
+        "minWidth": 650,
+        "minHeight": 400,
         "dragDropEnabled": false
       }
     ]
