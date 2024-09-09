@@ -111,6 +111,21 @@ export class ImageDiffComponent {
 
   mode: DiffMode = DiffMode.split;
   modes = Object.keys(DiffMode) as DiffMode[];
+  modeIcons = {
+    [DiffMode.split]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 12H13a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2.5a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h2.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1"></path></svg>',
+    [DiffMode.fade]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><mask id="fade" width="12" height="8" x="2" y="4" maskUnits="userSpaceOnUse" style="mask-type: alpha;"><path fill="currentColor" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1"></path></mask><g fill="currentColor" mask="url(#fade)"><path d="M2 12h2V4H2z"></path><path d="M4 12h2V4H4z" opacity="0.8"></path><path d="M6 12h2V4H6z" opacity="0.6"></path><path d="M8 12h2V4H8z" opacity="0.4"></path><path d="M10 12h2V4h-2z" opacity="0.2"></path></g></svg>',
+    [DiffMode.slider]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 13V3"></path><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h5V4H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1"></path></svg>',
+    [DiffMode.difference]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><path fill="currentColor" d="M8 5a3 3 0 0 1 0 6z"></path><path fill="currentColor" fill-rule="evenodd" d="M7.5 12H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h4.5a.5.5 0 0 1 .5.5V5a3 3 0 0 0 0 6v.5a.5.5 0 0 1-.5.5" clip-rule="evenodd"></path></svg>',
+    [DiffMode.highlight]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m4 9 2-2 2 2-2 2zM10 6l1-1 1 1-1 1z"></path></svg>',
+    [DiffMode.details]:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" preserveAspectRatio="none"><path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12h10a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1" opacity="0.4"></path><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.5H4M9 9.5H4"></path></svg>',
+  };
+
   zoomLevel = 1;
 
   setMode(mode: DiffMode) {

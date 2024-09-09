@@ -75,16 +75,17 @@
       @for (option of modes; track $index) {
         <button
           role="tab"
-          class="tab"
+          class="tab flex gap-2 font-bold hover:bg-base-100"
           [class.tab-active]="option === mode"
           (click)="setMode(option)"
         >
-          {{ option }}
+          <ng-icon [svg]="modeIcons[option]" size="1rem"></ng-icon>
+          {{ option | titlecase }}
         </button>
       }
     </div>
 
-    <div class="tabs-boxed tabs flex items-center gap-0.5">
+    <div class="tabs-boxed tabs flex items-center gap-1">
       <button
         role="button"
         class="btn btn-square btn-ghost btn-sm"
