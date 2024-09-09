@@ -276,7 +276,8 @@
                 <app-code-editor
                   #originalTextEditor
                   [autoFocus]="true"
-                  [formControl]="diffForm.controls.originalText"
+                  [ngModel]="diffForm.controls.originalText.value"
+                  (ngModelChange)="diffForm.controls.originalText.setValue($event)"
                   [theme]="(editorTheme | async)!"
                   [lineWrapping]="true"
                   [minHeight]="
@@ -301,7 +302,8 @@
                   </button>
                 </div>
                 <app-code-editor
-                  [formControl]="diffForm.controls.modifiedText"
+                  [ngModel]="diffForm.controls.modifiedText.value"
+                  (ngModelChange)="diffForm.controls.modifiedText.setValue($event)"
                   [theme]="(editorTheme | async)!"
                   [lineWrapping]="true"
                   data-control="modifiedText"
