@@ -116,65 +116,59 @@
       </button>
     </div>
   </div>
-  @switch (mode) {
-    @case ('split') {
-      <div class="h-full bg-base-200 p-1">
+  <div class="size-full justify-center rounded-lg bg-base-200 p-1">
+    @switch (mode) {
+      @case ('split') {
         <app-split-image-canvas
           [image1]="originalImage()!"
           [image2]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         >
         </app-split-image-canvas>
-      </div>
-    }
-    @case ('fade') {
-      <!-- overlay the two images on each other -->
-      <!-- create a slider -->
-      <div class="size-full justify-center bg-base-200 p-1">
+      }
+      @case ('fade') {
         <app-overlay-image-canvas
           [baseImage]="originalImage()!"
           [overlayImage]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         ></app-overlay-image-canvas>
-      </div>
-    }
-    @case ('slider') {
-      <div class="size-full justify-center bg-base-200 p-1">
+      }
+      @case ('slider') {
         <app-slider-image-canvas
           [baseImage]="originalImage()!"
           [overlayImage]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         ></app-slider-image-canvas>
-      </div>
-    }
-    @case ('difference') {
-      <div class="size-full justify-center bg-base-200 p-1">
+      }
+      @case ('difference') {
         <app-image-pixel-difference
           [baseImage]="originalImage()!"
           [overlayImage]="modifiedImage()!"
           [(zoom)]="zoomLevel"
         ></app-image-pixel-difference>
-      </div>
-    }
-    @case ('highlight') {
-      <div class="size-full justify-center bg-base-200 p-1">
+      }
+      @case ('highlight') {
         <app-image-highlight-difference
           [baseImage]="originalImage()!"
           [overlayImage]="modifiedImage()!"
           (diffChange)="highlightDiffImage.set($event)"
           [(zoom)]="zoomLevel"
         ></app-image-highlight-difference>
-      </div>
-    }
-    @case ('details') {
-      <div class="flex h-fit bg-base-200 p-1">
-        <div class="flex flex-col items-center">
-          <img [src]="originalImage()!.src" alt="Original image" class="max-h-52" />
+      }
+      @case ('details') {
+        <div class="flex gap-12">
+          <app-image-details
+            class="block flex-1"
+            [image]="originalImage()!"
+            [file]="originalFile()!"
+          ></app-image-details>
+          <app-image-details
+            class="block flex-1"
+            [image]="modifiedImage()!"
+            [file]="modifiedFile()!"
+          ></app-image-details>
         </div>
-        <div class="flex flex-col items-center">
-          <img [src]="modifiedImage()!.src" alt="Modified image" class="max-h-52" />
-        </div>
-      </div>
+      }
     }
-  }
+  </div>
 </div>

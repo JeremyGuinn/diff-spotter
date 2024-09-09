@@ -32,6 +32,7 @@ import { derivedAsync } from 'ngxtension/derived-async';
 import { ImageHighlightDifferenceComponent } from '../../components/image/image-highlight-difference/image-highlight-difference.component';
 import { save as saveDialog } from '@tauri-apps/plugin-dialog';
 import { writeFile } from '@tauri-apps/plugin-fs';
+import { ImageDetailsComponent } from '../../components/image/image-details/image-details.component';
 
 enum DiffMode {
   'split' = 'split',
@@ -55,6 +56,7 @@ enum DiffMode {
     SliderImageCanvasComponent,
     ImagePixelDifferenceComponent,
     ImageHighlightDifferenceComponent,
+    ImageDetailsComponent,
   ],
   providers: [
     provideIcons({
