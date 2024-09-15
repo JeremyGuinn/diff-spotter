@@ -85,11 +85,14 @@
             <div class="flex flex-col gap-2">
               <span class="text-tiny uppercase">Syntax highlighting</span>
               <div class="flex items-center justify-between gap-0.5 rounded-md p-0.5">
-                <select class="select select-bordered select-sm w-full">
+                <select
+                  class="select select-bordered select-sm w-full"
+                  [formControl]="diffSettings.controls.language"
+                >
                   <option disabled selected hidden>Choose syntax</option>
-                  <option value="">None</option>
+                  <option [ngValue]="null">None</option>
                   @for (language of languages; track language.name) {
-                    <option [value]="language">{{ language.name }}</option>
+                    <option [ngValue]="language">{{ language.name }}</option>
                   }
                 </select>
               </div>
@@ -244,6 +247,8 @@
             minHeight="600px"
             [value]="liveDiff.controls.modifiedText.value"
             [disabled]="diffSettings.controls.liveEdit.value"
+            [language]="diffSettings.controls.language.value?.name ?? ''"
+            [languages]="languages"
             [readonly]="!diffSettings.controls.liveEdit.value"
             [lineWrapping]="true"
             [extensions]="(unifiedDiffExtensions | async)!"
@@ -279,6 +284,8 @@
                   [ngModel]="diffForm.controls.originalText.value"
                   (ngModelChange)="diffForm.controls.originalText.setValue($event)"
                   [theme]="(editorTheme | async)!"
+                  [languages]="languages"
+                  [language]="diffSettings.controls.language.value?.name ?? ''"
                   [lineWrapping]="true"
                   [minHeight]="
                     !liveDiff.controls.originalText.value && !liveDiff.controls.modifiedText.value
@@ -306,6 +313,8 @@
                   (ngModelChange)="diffForm.controls.modifiedText.setValue($event)"
                   [theme]="(editorTheme | async)!"
                   [lineWrapping]="true"
+                  [languages]="languages"
+                  [language]="diffSettings.controls.language.value?.name ?? ''"
                   data-control="modifiedText"
                   [minHeight]="
                     !liveDiff.controls.originalText.value && !liveDiff.controls.modifiedText.value

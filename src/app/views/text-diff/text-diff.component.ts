@@ -9,6 +9,7 @@ import {
   Input,
   Output,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -46,10 +47,8 @@ import { MergeView, unifiedMergeView } from '@codemirror/merge';
 import { calculateLinesRemovedAndAdded } from '@lib/diffs';
 import { CopyButtonComponent } from '../../components/copy-button/copy-button.component';
 
-import { language } from '@codemirror/language';
+import { LanguageDescription, LanguageSupport } from '@codemirror/language';
 import { languages } from '@codemirror/language-data';
-import { javascript } from '@codemirror/lang-javascript';
-import { htmlLanguage, html } from '@codemirror/lang-html';
 import { cleanMultilineString } from '@lib/strings';
 import { TextDiffSettings } from '@app/services/diffs';
 
@@ -106,7 +105,7 @@ export class TextDiffComponent {
         liveEdit: settings.liveEdit,
         unifiedDiff: settings.unifiedDiff,
         collapseLines: settings.collapseLines,
-        language: settings.language,
+        language: languages.find(l => l.name === settings.language),
         highlightMode: settings.highlightMode,
       });
     }
@@ -118,6 +117,8 @@ export class TextDiffComponent {
   }>();
   @Output() diffChange = new EventEmitter<void>();
   @Output() settingsChange = new EventEmitter<TextDiffSettings>();
+
+  @ViewChild(DiffEditorComponent) diffEditor!: DiffEditorComponent;
 
   protected readonly EditorState = EditorState;
   protected readonly EditorView = EditorView;
@@ -131,16 +132,7 @@ export class TextDiffComponent {
   diffMergeView = new ReplaySubject<MergeView>(1);
   activeTab = signal<'history' | 'settings'>('settings');
   languageConf = new Compartment();
-
-  autoLanguage = EditorState.transactionExtender.of(tr => {
-    if (!tr.docChanged) return null;
-    const docIsHTML = /^\s*</.test(tr.newDoc.sliceString(0, 100));
-    const stateIsHTML = tr.startState.facet(language) == htmlLanguage;
-    if (docIsHTML == stateIsHTML) return null;
-    return {
-      effects: this.languageConf.reconfigure(docIsHTML ? html() : javascript()),
-    };
-  });
+  activeLang?: LanguageSupport;
 
   editorTheme = this.themeService.getTheme().pipe(
     map(theme => (theme === 'dark' ? materialDark : materialLight)),
@@ -153,7 +145,7 @@ export class TextDiffComponent {
     liveEdit: new FormControl<boolean>(false, { nonNullable: true }),
     unifiedDiff: new FormControl<boolean>(false, { nonNullable: true }),
     collapseLines: new FormControl<boolean>(false, { nonNullable: true }),
-    language: new FormControl<string>('text', { nonNullable: true }),
+    language: new FormControl<LanguageDescription | null>(null),
     highlightMode: new FormControl<'line' | 'character'>('character', {
       nonNullable: true,
     }),
@@ -182,8 +174,7 @@ export class TextDiffComponent {
       EditorState.readOnly.of(!editable),
       EditorView.lineWrapping,
       editorTheme,
-      this.languageConf.of(javascript()),
-      this.autoLanguage,
+      this.languageConf.of(this.activeLang ?? []),
     ]),
     shareReplay(1),
   );
@@ -197,8 +188,7 @@ export class TextDiffComponent {
     ),
   }).pipe(
     map(({ collapseLines }) => [
-      this.languageConf.of(javascript()),
-      this.autoLanguage,
+      this.languageConf.of(this.activeLang ?? []),
       EditorView.lineWrapping,
       unifiedMergeView({
         original: this.diffForm.controls.originalText.value,
@@ -257,7 +247,17 @@ export class TextDiffComponent {
           unifiedDiff: this.diffSettings.value.unifiedDiff,
           collapseLines: this.diffSettings.value.collapseLines,
           highlightMode: this.diffSettings.value.highlightMode,
-          language: this.diffSettings.value.language,
+          language: this.diffSettings.value.language?.name,
+        });
+
+        this.diffSettings.value.language?.load().then(langSupport => {
+          this.activeLang = langSupport;
+          this.diffEditor?.mergeView?.a.dispatch({
+            effects: this.languageConf.reconfigure(langSupport),
+          });
+          this.diffEditor?.mergeView?.b.dispatch({
+            effects: this.languageConf.reconfigure(langSupport),
+          });
         });
       });
 
